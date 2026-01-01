@@ -1,16 +1,316 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>snHardy - root</title>
-  <meta name="description" content="Basis index.html toegevoegd voor hosting.">
-  <style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;margin:3rem;color:#111} a{color:#0366d6}</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wandel Challenge App</title>
+    <style>
+        :root { --primary: #2ecc71; --dark: #2c3e50; --light: #ecf0f1; --highlight: #f1c40f; }
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: var(--light); margin: 0; padding: 20px; color: var(--dark); }
+        .container { max-width: 500px; margin: 0 auto; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); position: relative; }
+        
+        /* Navigatie */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--dark); color: white; }
+        .settings-btn { background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; }
+
+        /* Views */
+        .view { display: none; padding: 20px; }
+        .active-view { display: block; }
+        
+        /* Dashboard Styling */
+        .section-box { margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        .section-title { font-size: 0.85rem; text-transform: uppercase; color: #7f8c8d; letter-spacing: 1px; margin-bottom: 10px; font-weight: bold; }
+        .big-stat { font-size: 1.6rem; font-weight: bold; color: var(--dark); }
+        .sub-stat { color: #7f8c8d; font-size: 0.9rem; }
+
+        /* Progress Bar */
+        .progress-track { background: #eee; height: 15px; border-radius: 8px; margin: 10px 0; overflow: hidden; position: relative; }
+        .progress-fill { background: var(--primary); height: 100%; width: 0%; transition: width 0.5s; }
+        
+        /* Input Area */
+        .input-row { display: flex; gap: 10px; margin-top: 5px; }
+        select, input { padding: 12px; border: 2px solid #eee; border-radius: 8px; flex: 1; }
+        .btn-action { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        
+        /* Route Kiezer Styling */
+        .route-card { border: 2px solid #eee; padding: 15px; border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
+        .route-card:hover { border-color: var(--primary); background: #f9fff9; }
+        .route-card h4 { margin: 0 0 5px 0; }
+        
+        /* Leaderboard */
+        .list-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f1f1f1; }
+        
+        #loadingOverlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); align-items:center; justify-content:center; z-index:99; }
+    </style>
 </head>
 <body>
-  <h1>Welkom bij snhardy-max/root</h1>
-  <p>Deze repository bevat een eenvoudige <code>index.html</code> zodat je kunt beginnen met hosten (bijv. GitHub Pages).</p>
-  <p>Meer info over GitHub Pages: <a href="https://docs.github.com/pages">https://docs.github.com/pages</a></p>
-  <footer><p>Gemaakt op 2026-01-01 door snhardy-max</p></footer>
+
+<div id="loadingOverlay">Data ophalen...</div>
+
+<div class="container">
+    
+    <div class="top-bar">
+        <span id="headerTitle">Via Francigena</span>
+        <button class="settings-btn" onclick="toggleRouteScreen()">⚙️</button>
+    </div>
+
+    <div id="view-dashboard" class="view active-view">
+        
+        <div class="section-box" style="text-align: center;">
+            <div class="section-title">Huidige Locatie</div>
+            <div class="big-stat" id="currentLocation">Laden...</div>
+            <div class="sub-stat">Volgende: <span id="nextStopName">...</span> (<span id="nextStopDist">...</span> km)</div>
+        </div>
+
+        <div class="section-box">
+            <div class="section-title">Voortgang Route</div>
+            <div class="progress-track"><div class="progress-fill" id="progBar"></div></div>
+            <div style="display:flex; justify-content:space-between; font-size:0.9rem;">
+                <strong><span id="totalKmDisplay">0</span> km</strong>
+                <span style="color:#999;">Totaal: <span id="routeTotalDisplay">2040</span> km</span>
+            </div>
+        </div>
+
+        <div class="section-box">
+            <div class="section-title">Kilometers Toevoegen</div>
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 10px;">
+                <label style="font-size:0.8rem; color:#666;">Wie ben je?</label>
+                <select id="userSelect" style="width:100%; margin-bottom:10px;">
+                    <option value="Rowland">Rowland</option>
+                    <option value="Henk">Henk</option>
+                    <option value="Jolien">Jolien</option>
+                    <option value="Jan">Jan</option>
+                    <option value="Maria">Maria</option>
+                    <option value="Celine">Celine</option>
+                    <option value="Nienke">Nienke</option>
+                    <option value="Stefan">Stefan</option>
+                </select>
+                
+                <div class="input-row">
+                    <input type="number" id="inputKm" placeholder="Aantal KM">
+                    <button class="btn-action" onclick="submitKm()">+</button>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="section-title">Team Stand</div>
+            <div id="teamList"></div>
+            <button onclick="fetchData()" style="margin-top:15px; width:100%; padding:8px; background:none; border:1px solid #ddd; border-radius:6px; cursor:pointer; color:#777;">🔄 Data Verversen</button>
+        </div>
+    </div>
+
+    <div id="view-routes" class="view">
+        <h2>Kies of Maak een Route</h2>
+        <p style="color:#666; font-size:0.9rem;">Selecteer een route. De afstanden en steden worden direct geladen.</p>
+
+        <div class="route-card" onclick="setRoute('francigena')">
+            <h4>🇮🇹 Via Francigena</h4>
+            <p style="margin:0; font-size:0.85rem; color:#666;">Canterbury naar Rome (2040 km)</p>
+        </div>
+
+        <div class="route-card" onclick="setRoute('santiago')">
+            <h4>🇪🇸 Santiago de Compostela</h4>
+            <p style="margin:0; font-size:0.85rem; color:#666;">Camino Francés (780 km)</p>
+        </div>
+
+        <div class="route-card" onclick="setRoute('pieterpad')">
+            <h4>🇳🇱 Pieterpad</h4>
+            <p style="margin:0; font-size:0.85rem; color:#666;">Pieterburen naar St. Pietersberg (500 km)</p>
+        </div>
+
+        <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
+
+        <h3>➕ Eigen Route Maken</h3>
+        <label style="font-size:0.8rem;">Naam van route:</label>
+        <input type="text" id="customName" placeholder="Bijv. Rondje IJsselmeer">
+        <label style="font-size:0.8rem;">Totale afstand (km):</label>
+        <input type="number" id="customDist" placeholder="Bijv. 400">
+        <button class="btn-action" style="width:100%; margin-top:10px;" onclick="createCustomRoute()">Maak en Start</button>
+
+        <button onclick="toggleRouteScreen()" style="margin-top:20px; width:100%; background:none; border:none; text-decoration:underline; cursor:pointer;">Annuleren / Terug</button>
+    </div>
+
+</div>
+
+<script>
+    // --- CONFIGURATIE ---
+    // JOUW GOOGLE SCRIPT LINK:
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwdGKnox2pyZojjHltST1_wkATIbIyTSNoxwB-KLuYVuiCKMa-QPCNa7qw1AcYL4FOM/exec"; 
+    
+    // Database van Routes (Presets)
+    const ROUTE_DB = {
+        'francigena': {
+            name: "Via Francigena",
+            totalKm: 2040,
+            checkpoints: [
+                { name: "Canterbury", km: 0 }, { name: "Calais", km: 32 }, { name: "Arras", km: 150 },
+                { name: "Reims", km: 350 }, { name: "Besançon", km: 700 }, { name: "Lausanne", km: 820 },
+                { name: "Gr. St. Bernhardpas", km: 950 }, { name: "Aosta", km: 990 }, { name: "Pavia", km: 1150 },
+                { name: "Lucca", km: 1400 }, { name: "Siena", km: 1550 }, { name: "Viterbo", km: 1900 }, { name: "Rome", km: 2040 }
+            ]
+        },
+        'santiago': {
+            name: "Camino Francés",
+            totalKm: 780,
+            checkpoints: [
+                { name: "St. Jean Pied de Port", km: 0 }, { name: "Pamplona", km: 70 }, { name: "Logroño", km: 170 },
+                { name: "Burgos", km: 290 }, { name: "León", km: 470 }, { name: "Astorga", km: 520 },
+                { name: "Ponferrada", km: 575 }, { name: "Sarria", km: 665 }, { name: "Santiago de Compostela", km: 780 }
+            ]
+        },
+        'pieterpad': {
+            name: "Pieterpad",
+            totalKm: 500,
+            checkpoints: [
+                { name: "Pieterburen", km: 0 }, { name: "Groningen", km: 30 }, { name: "Coevorden", km: 150 },
+                { name: "Ommen", km: 190 }, { name: "Vorden", km: 280 }, { name: "Montferland", km: 330 },
+                { name: "Groesbeek", km: 370 }, { name: "Venlo", km: 420 }, { name: "Sint Pietersberg", km: 500 }
+            ]
+        }
+    };
+
+    // Huidige State
+    let activeRoute = ROUTE_DB['francigena']; // Start direct met Francigena
+    let usersData = {};
+
+    // --- INITIALISATIE ---
+    window.onload = function() {
+        // Direct laden
+        updateUIConfig();
+        fetchData();
+    };
+
+    // --- NAVIGATIE & ROUTE LOGICA ---
+    function toggleRouteScreen() {
+        const dashboard = document.getElementById('view-dashboard');
+        const routes = document.getElementById('view-routes');
+        
+        if (routes.style.display === 'block') {
+            routes.style.display = 'none';
+            dashboard.style.display = 'block';
+        } else {
+            dashboard.style.display = 'none';
+            routes.style.display = 'block';
+        }
+    }
+
+    function setRoute(key) {
+        activeRoute = ROUTE_DB[key];
+        // We resetten de data NIET in de database (omdat we 1 sheet delen in dit prototype),
+        // maar visueel verandert de route.
+        updateUIConfig();
+        toggleRouteScreen();
+        fetchData(); // Herlaad data
+    }
+
+    function createCustomRoute() {
+        const name = document.getElementById('customName').value;
+        const dist = parseFloat(document.getElementById('customDist').value);
+
+        if(!name || !dist) { alert("Vul naam en afstand in."); return; }
+
+        // Genereer automatische checkpoints (wiskundig)
+        let generatedPoints = [];
+        generatedPoints.push({ name: "Start", km: 0 });
+        generatedPoints.push({ name: "20% Checkpoint", km: dist * 0.2 });
+        generatedPoints.push({ name: "40% Checkpoint", km: dist * 0.4 });
+        generatedPoints.push({ name: "Halverwege!", km: dist * 0.5 });
+        generatedPoints.push({ name: "80% Checkpoint", km: dist * 0.8 });
+        generatedPoints.push({ name: "Finish: " + name, km: dist });
+
+        activeRoute = {
+            name: name,
+            totalKm: dist,
+            checkpoints: generatedPoints
+        };
+
+        updateUIConfig();
+        toggleRouteScreen();
+        fetchData();
+    }
+
+    function updateUIConfig() {
+        document.getElementById('headerTitle').innerText = activeRoute.name;
+        document.getElementById('routeTotalDisplay').innerText = activeRoute.totalKm;
+    }
+
+    // --- DATA FUNCTIES (Google Sheets) ---
+    function fetchData() {
+        document.getElementById('loadingOverlay').style.display = 'flex';
+        fetch(GOOGLE_SCRIPT_URL)
+            .then(response => response.json())
+            .then(data => {
+                usersData = data;
+                renderDashboard();
+                document.getElementById('loadingOverlay').style.display = 'none';
+            })
+            .catch(e => {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                console.error(e);
+            });
+    }
+
+    function submitKm() {
+        const input = document.getElementById('inputKm');
+        const user = document.getElementById('userSelect').value;
+        const km = parseFloat(input.value);
+
+        if (!km || km <= 0) return;
+
+        document.getElementById('loadingOverlay').style.display = 'flex';
+        const formData = new FormData();
+        formData.append('naam', user);
+        formData.append('km', km);
+
+        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: formData })
+        .then(() => {
+            input.value = '';
+            fetchData();
+        });
+    }
+
+    function renderDashboard() {
+        // Totaal berekenen
+        const allNames = ["Rowland", "Henk", "Jolien", "Jan", "Maria", "Celine", "Nienke", "Stefan"];
+        let totalWalked = 0;
+        let displayList = [];
+
+        allNames.forEach(name => {
+            let km = usersData[name] || 0;
+            totalWalked += km;
+            displayList.push({ name: name, km: km });
+        });
+
+        const percentage = Math.min(100, (totalWalked / activeRoute.totalKm) * 100);
+
+        // Checkpoints berekenen
+        let passedPoints = [...activeRoute.checkpoints].reverse().filter(p => p.km <= totalWalked);
+        let currentCity = passedPoints.length > 0 ? passedPoints[0] : activeRoute.checkpoints[0];
+        let nextCity = activeRoute.checkpoints.find(p => p.km > totalWalked);
+
+        // UI vullen
+        document.getElementById('currentLocation').innerText = currentCity.name;
+        document.getElementById('totalKmDisplay').innerText = totalWalked.toFixed(1);
+        document.getElementById('progBar').style.width = percentage + "%";
+
+        if (nextCity) {
+            document.getElementById('nextStopName').innerText = nextCity.name;
+            document.getElementById('nextStopDist').innerText = (nextCity.km - totalWalked).toFixed(1);
+        } else {
+            document.getElementById('nextStopName').innerText = "Finish bereikt!";
+            document.getElementById('nextStopDist').innerText = "0";
+        }
+
+        // Lijst updaten
+        const listEl = document.getElementById('teamList');
+        listEl.innerHTML = '';
+        displayList.sort((a,b) => b.km - a.km);
+        displayList.forEach(u => {
+            listEl.innerHTML += `<div class="list-item"><span>${u.name}</span><span>${u.km.toFixed(1)} km</span></div>`;
+        });
+    }
+</script>
+
 </body>
 </html>
