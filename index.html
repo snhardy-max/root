@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Waar leeft de Bunzing?</title>
+<title>Waar leeft of groeit jouw soort?</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
 
@@ -13,14 +13,18 @@
     --bg: #f7f9f4;
     --card: #ffffff;
     --ocean: #dceaf5;
+    --land: #b0c9a5;
+    --land-hover: #c8ddbf;
+    --land-stroke: #ffffff;
+    --selected: #e8922e;
+    --selected-dark: #b56a14;
+    --selected-hover: #d47f1e;
+    --selected-light: #f5ddb8;
     --green-soft: #6a9f5c;
     --green-dark: #3d6b35;
-    --green-light: #b0c9a5;
-    --green-selected: #e8922e;
     --text: #2e3a2c;
     --text-light: #5a6b57;
     --border: #d0ddc9;
-    --hover: #e8f0e4;
     --shadow: rgba(61, 107, 53, 0.08);
   }
 
@@ -35,13 +39,113 @@
     padding: 20px;
   }
 
+  /* ---- INTRO SCREEN ---- */
+  .intro {
+    max-width: 440px;
+    width: 100%;
+    background: var(--card);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 12px var(--shadow);
+    padding: 32px 28px;
+    text-align: center;
+    margin-top: 40px;
+  }
+
+  .intro h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--green-dark);
+    margin-bottom: 6px;
+  }
+
+  .intro p {
+    font-size: 0.95rem;
+    color: var(--text-light);
+    line-height: 1.5;
+    margin-bottom: 20px;
+  }
+
+  .intro label {
+    display: block;
+    text-align: left;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-light);
+    margin-bottom: 6px;
+  }
+
+  .intro input[type="text"] {
+    width: 100%;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.05rem;
+    padding: 10px 14px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    outline: none;
+    transition: border-color 0.15s ease;
+    margin-bottom: 16px;
+  }
+
+  .intro input[type="text"]:focus {
+    border-color: var(--green-soft);
+  }
+
+  .type-options {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .type-option {
+    flex: 1;
+    padding: 10px 6px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: center;
+  }
+
+  .type-option:hover {
+    border-color: var(--green-soft);
+    background: #eef4ea;
+  }
+
+  .type-option.active {
+    border-color: var(--green-dark);
+    background: #e2eddb;
+  }
+
+  .type-option .type-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--green-dark);
+  }
+
+  .type-option .type-icon {
+    font-size: 1.4rem;
+    margin-bottom: 2px;
+  }
+
+  .error-msg {
+    color: #c0392b;
+    font-size: 0.82rem;
+    margin-bottom: 10px;
+    display: none;
+  }
+
+  /* ---- MAP SCREEN ---- */
+  .map-screen { display: none; width: 100%; max-width: 960px; }
+
   .header {
     text-align: center;
     margin-bottom: 16px;
   }
 
   .header h1 {
-    font-size: 1.6rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: var(--green-dark);
     margin-bottom: 4px;
@@ -51,6 +155,7 @@
     font-size: 0.95rem;
     color: var(--text-light);
     max-width: 500px;
+    margin: 0 auto;
     line-height: 1.5;
   }
 
@@ -61,7 +166,6 @@
     box-shadow: 0 2px 12px var(--shadow);
     padding: 16px;
     width: 100%;
-    max-width: 960px;
     position: relative;
   }
 
@@ -75,27 +179,27 @@
   }
 
   #map-svg path.country {
-    fill: var(--green-light);
-    stroke: #ffffff;
+    fill: var(--land);
+    stroke: var(--land-stroke);
     stroke-width: 0.8;
     transition: fill 0.15s ease;
     cursor: pointer;
   }
 
   #map-svg path.country:hover {
-    fill: #c8ddbf;
+    fill: var(--land-hover);
     stroke: var(--green-dark);
     stroke-width: 1.2;
   }
 
   #map-svg path.country.selected {
-    fill: var(--green-selected);
-    stroke: #b56a14;
+    fill: var(--selected);
+    stroke: var(--selected-dark);
     stroke-width: 1.2;
   }
 
   #map-svg path.country.selected:hover {
-    fill: #d47f1e;
+    fill: var(--selected-hover);
   }
 
   .controls {
@@ -122,9 +226,7 @@
     color: #fff;
   }
 
-  .btn-primary:hover {
-    background: var(--green-dark);
-  }
+  .btn-primary:hover { background: var(--green-dark); }
 
   .btn-secondary {
     background: var(--card);
@@ -132,9 +234,7 @@
     border: 1px solid var(--border);
   }
 
-  .btn-secondary:hover {
-    background: var(--hover);
-  }
+  .btn-secondary:hover { background: #eef4ea; }
 
   .btn:disabled {
     opacity: 0.5;
@@ -159,9 +259,30 @@
     font-size: 1rem;
   }
 
+  .legend {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 10px;
+    font-size: 0.8rem;
+    color: var(--text-light);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .legend-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+
   .selected-list {
     margin-top: 16px;
-    max-width: 960px;
     width: 100%;
   }
 
@@ -179,7 +300,7 @@
   }
 
   .tag {
-    background: #f5ddb8;
+    background: var(--selected-light);
     color: #8a5510;
     font-size: 0.8rem;
     font-weight: 600;
@@ -190,7 +311,7 @@
   }
 
   .tag:hover {
-    background: #e8922e;
+    background: var(--selected);
     color: #fff;
   }
 
@@ -229,73 +350,81 @@
     margin-bottom: 12px;
   }
 
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* Export overlay styling for the hidden canvas */
   #export-canvas { display: none; }
-
-  .legend {
-    display: flex;
-    gap: 16px;
-    justify-content: center;
-    margin-top: 10px;
-    font-size: 0.8rem;
-    color: var(--text-light);
-  }
-
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-
-  .legend-swatch {
-    width: 14px;
-    height: 14px;
-    border-radius: 4px;
-    border: 1px solid var(--border);
-  }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h1>Waar leeft de bunzing?</h1>
-  <p>Klik op de landen waar de bunzing voorkomt. Klik nogmaals om een land te deselecteren.</p>
-</div>
+<!-- ======= INTRO SCREEN ======= -->
+<div class="intro" id="intro-screen">
+  <h1>Wereldkaart</h1>
+  <p>Vul de naam van jouw dier, plant of bloem in. Daarna kun je op de kaart aanklikken in welke landen het voorkomt.</p>
 
-<div class="map-container" id="map-container">
-  <div class="loading" id="loading">
-    <div class="spinner"></div>
-    Kaart laden...
-  </div>
-  <svg id="map-svg" viewBox="0 0 960 500" xmlns="http://www.w3.org/2000/svg" style="display:none;"></svg>
-  <div class="legend">
-    <div class="legend-item">
-      <div class="legend-swatch" style="background: var(--green-light);"></div>
-      Niet geselecteerd
+  <label for="species-name">Naam van jouw soort</label>
+  <input type="text" id="species-name" placeholder="Bijv. Bunzing, Varen, Lavendel..." autofocus>
+
+  <label>Wat voor soort is het?</label>
+  <div class="type-options">
+    <div class="type-option" data-type="dier" id="opt-dier">
+      <div class="type-icon">🦡</div>
+      <div class="type-label">Dier</div>
     </div>
-    <div class="legend-item">
-      <div class="legend-swatch" style="background: var(--green-selected);"></div>
-      Bunzing leeft hier
+    <div class="type-option" data-type="plant" id="opt-plant">
+      <div class="type-icon">🌿</div>
+      <div class="type-label">Plant</div>
+    </div>
+    <div class="type-option" data-type="bloem" id="opt-bloem">
+      <div class="type-icon">🌼</div>
+      <div class="type-label">Bloem</div>
     </div>
   </div>
-  <div class="info-bar">
-    <span>Geselecteerde landen: <span class="counter" id="counter">0</span></span>
-    <span id="hover-name" style="font-weight:600; color: var(--green-dark);"></span>
+
+  <div class="error-msg" id="error-msg">Vul een naam in en kies een soort.</div>
+
+  <button class="btn btn-primary" id="btn-start" style="width:100%; padding: 12px;">Ga naar de kaart</button>
+</div>
+
+<!-- ======= MAP SCREEN ======= -->
+<div class="map-screen" id="map-screen">
+  <div class="header">
+    <h1 id="map-title"></h1>
+    <p>Klik op de landen waar <span id="species-label"></span> voorkomt. Klik nogmaals om te deselecteren.</p>
   </div>
-</div>
 
-<div class="controls">
-  <button class="btn btn-primary" id="btn-export" disabled>Opslaan als afbeelding</button>
-  <button class="btn btn-secondary" id="btn-reset" disabled>Opnieuw beginnen</button>
-</div>
+  <div class="map-container" id="map-container">
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      Kaart laden...
+    </div>
+    <svg id="map-svg" viewBox="0 0 960 500" xmlns="http://www.w3.org/2000/svg" style="display:none;"></svg>
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-swatch" style="background: var(--land);"></div>
+        Niet geselecteerd
+      </div>
+      <div class="legend-item">
+        <div class="legend-swatch" style="background: var(--selected);"></div>
+        Komt hier voor
+      </div>
+    </div>
+    <div class="info-bar">
+      <span>Geselecteerde landen: <span class="counter" id="counter">0</span></span>
+      <span id="hover-name" style="font-weight:600; color: var(--green-dark);"></span>
+    </div>
+  </div>
 
-<div class="selected-list" id="selected-list" style="display:none;">
-  <h3>Geselecteerde landen:</h3>
-  <div class="tags" id="tags"></div>
+  <div class="controls">
+    <button class="btn btn-primary" id="btn-export" disabled>Opslaan als afbeelding</button>
+    <button class="btn btn-secondary" id="btn-reset" disabled>Opnieuw beginnen</button>
+    <button class="btn btn-secondary" id="btn-back">Andere soort kiezen</button>
+  </div>
+
+  <div class="selected-list" id="selected-list" style="display:none;">
+    <h3>Geselecteerde landen:</h3>
+    <div class="tags" id="tags"></div>
+  </div>
 </div>
 
 <div class="tooltip" id="tooltip"></div>
@@ -304,13 +433,62 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <script>
-(async function() {
-  const svg = d3.select('#map-svg');
-  const width = 960;
-  const height = 500;
-  const selected = new Set();
+(function() {
+  let speciesName = '';
+  let speciesType = '';
+  let selected = new Set();
+  let mapReady = false;
+  let countries, projection, path;
 
-  // Country name translations (common ones to Dutch)
+  const introScreen = document.getElementById('intro-screen');
+  const mapScreen = document.getElementById('map-screen');
+  const nameInput = document.getElementById('species-name');
+  const errorMsg = document.getElementById('error-msg');
+  const btnStart = document.getElementById('btn-start');
+  const typeOptions = document.querySelectorAll('.type-option');
+
+  typeOptions.forEach(opt => {
+    opt.addEventListener('click', () => {
+      typeOptions.forEach(o => o.classList.remove('active'));
+      opt.classList.add('active');
+      speciesType = opt.dataset.type;
+    });
+  });
+
+  btnStart.addEventListener('click', startMap);
+  nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') startMap(); });
+
+  function startMap() {
+    const name = nameInput.value.trim();
+    if (!name || !speciesType) {
+      errorMsg.style.display = 'block';
+      return;
+    }
+    errorMsg.style.display = 'none';
+    speciesName = name;
+
+    const article = speciesType === 'dier' ? 'het' : 'de';
+    const label = `${article} ${speciesName}`;
+
+    document.getElementById('map-title').textContent = `Waar leeft of groeit ${article} ${speciesName}?`;
+    document.getElementById('species-label').textContent = label;
+
+    introScreen.style.display = 'none';
+    mapScreen.style.display = 'flex';
+    mapScreen.style.flexDirection = 'column';
+    mapScreen.style.alignItems = 'center';
+
+    if (!mapReady) loadMap();
+  }
+
+  document.getElementById('btn-back').addEventListener('click', () => {
+    mapScreen.style.display = 'none';
+    introScreen.style.display = 'block';
+    selected.clear();
+    d3.selectAll('path.country').classed('selected', false);
+    updateUI();
+  });
+
   const nlNames = {
     'Afghanistan':'Afghanistan','Albania':'Albanië','Algeria':'Algerije','Angola':'Angola',
     'Argentina':'Argentinië','Armenia':'Armenië','Australia':'Australië','Austria':'Oostenrijk',
@@ -361,37 +539,6 @@
     'Somaliland':'Somaliland','Vanuatu':'Vanuatu','Antarctica':'Antarctica'
   };
 
-  function getName(props) {
-    const en = props.name;
-    return nlNames[en] || en || 'Onbekend';
-  }
-
-  // Load world data
-  let world;
-  try {
-    const resp = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
-    world = await resp.json();
-  } catch(e) {
-    try {
-      const resp2 = await fetch('https://unpkg.com/world-atlas@2.0.2/countries-110m.json');
-      world = await resp2.json();
-    } catch(e2) {
-      document.getElementById('loading').innerHTML = '<p>Kaart kon niet geladen worden. Controleer je internetverbinding.</p>';
-      return;
-    }
-  }
-
-  const countries = topojson.feature(world, world.objects.countries);
-
-  // We need country names - load from a separate source or use the ID mapping
-  // Use Natural Earth 110m with names
-  let namesWorld;
-  try {
-    const resp = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
-    namesWorld = await resp.json();
-  } catch(e) {}
-
-  // Country ID to name mapping (ISO 3166-1 numeric)
   const idToName = {
     '004':'Afghanistan','008':'Albania','012':'Algeria','024':'Angola','032':'Argentina',
     '051':'Armenia','036':'Australia','040':'Austria','031':'Azerbaijan','050':'Bangladesh',
@@ -431,21 +578,12 @@
     '384':'Côte d\'Ivoire'
   };
 
-  // Assign names to features
-  countries.features.forEach(f => {
-    const id = String(f.id);
-    f.properties.name = idToName[id] || f.properties.name || 'Onbekend';
-  });
+  function getName(props) {
+    return nlNames[props.name] || props.name || 'Onbekend';
+  }
 
-  const projection = d3.geoNaturalEarth1()
-    .fitSize([width, height], countries);
-
-  const path = d3.geoPath().projection(projection);
-
-  // Draw countries
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('map-svg').style.display = 'block';
-
+  const svg = d3.select('#map-svg');
+  const width = 960, height = 500;
   const tooltip = document.getElementById('tooltip');
   const counter = document.getElementById('counter');
   const hoverName = document.getElementById('hover-name');
@@ -454,40 +592,68 @@
   const selectedList = document.getElementById('selected-list');
   const tagsEl = document.getElementById('tags');
 
-  svg.selectAll('path.country')
-    .data(countries.features)
-    .enter()
-    .append('path')
-    .attr('class', 'country')
-    .attr('d', path)
-    .on('click', function(event, d) {
-      const name = getName(d.properties);
-      if (name === 'Onbekend' || name === 'Antarctica') return;
-
-      if (selected.has(name)) {
-        selected.delete(name);
-        d3.select(this).classed('selected', false);
-      } else {
-        selected.add(name);
-        d3.select(this).classed('selected', true);
+  async function loadMap() {
+    let world;
+    try {
+      const r = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
+      world = await r.json();
+    } catch(e) {
+      try {
+        const r2 = await fetch('https://unpkg.com/world-atlas@2.0.2/countries-110m.json');
+        world = await r2.json();
+      } catch(e2) {
+        document.getElementById('loading').innerHTML = '<p>Kaart kon niet geladen worden.</p>';
+        return;
       }
-      updateUI();
-    })
-    .on('mouseenter', function(event, d) {
-      const name = getName(d.properties);
-      if (name === 'Antarctica') return;
-      hoverName.textContent = name;
-      tooltip.textContent = name;
-      tooltip.style.opacity = '1';
-    })
-    .on('mousemove', function(event) {
-      tooltip.style.left = (event.clientX + 12) + 'px';
-      tooltip.style.top = (event.clientY - 30) + 'px';
-    })
-    .on('mouseleave', function() {
-      hoverName.textContent = '';
-      tooltip.style.opacity = '0';
+    }
+
+    countries = topojson.feature(world, world.objects.countries);
+    countries.features.forEach(f => {
+      f.properties.name = idToName[String(f.id)] || f.properties.name || 'Onbekend';
     });
+
+    projection = d3.geoNaturalEarth1().fitSize([width, height], countries);
+    path = d3.geoPath().projection(projection);
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('map-svg').style.display = 'block';
+
+    svg.selectAll('path.country')
+      .data(countries.features)
+      .enter()
+      .append('path')
+      .attr('class', 'country')
+      .attr('d', path)
+      .on('click', function(event, d) {
+        const name = getName(d.properties);
+        if (name === 'Onbekend' || name === 'Antarctica') return;
+        if (selected.has(name)) {
+          selected.delete(name);
+          d3.select(this).classed('selected', false);
+        } else {
+          selected.add(name);
+          d3.select(this).classed('selected', true);
+        }
+        updateUI();
+      })
+      .on('mouseenter', function(event, d) {
+        const name = getName(d.properties);
+        if (name === 'Antarctica') return;
+        hoverName.textContent = name;
+        tooltip.textContent = name;
+        tooltip.style.opacity = '1';
+      })
+      .on('mousemove', function(event) {
+        tooltip.style.left = (event.clientX + 12) + 'px';
+        tooltip.style.top = (event.clientY - 30) + 'px';
+      })
+      .on('mouseleave', function() {
+        hoverName.textContent = '';
+        tooltip.style.opacity = '0';
+      });
+
+    mapReady = true;
+  }
 
   function updateUI() {
     const count = selected.size;
@@ -501,8 +667,6 @@
       tagsEl.innerHTML = sorted.map(n =>
         `<span class="tag" data-name="${n}">${n} ×</span>`
       ).join('');
-
-      // Click tag to deselect
       tagsEl.querySelectorAll('.tag').forEach(tag => {
         tag.addEventListener('click', () => {
           const name = tag.dataset.name;
@@ -518,14 +682,12 @@
     }
   }
 
-  // Reset
   btnReset.addEventListener('click', () => {
     selected.clear();
     svg.selectAll('path.country').classed('selected', false);
     updateUI();
   });
 
-  // Export as image
   btnExport.addEventListener('click', async () => {
     btnExport.textContent = 'Bezig met opslaan...';
     btnExport.disabled = true;
@@ -535,72 +697,46 @@
       const serializer = new XMLSerializer();
       let svgString = serializer.serializeToString(svgEl);
 
-      // Get computed styles and inline them
-      const styles = `
-        <style>
-          path.country { fill: #b0c9a5; stroke: #fff; stroke-width: 0.8; }
-          path.country.selected { fill: #e8922e; stroke: #b56a14; stroke-width: 1.2; }
-        </style>
-      `;
+      const styles = `<style>
+        path.country { fill: #b0c9a5; stroke: #fff; stroke-width: 0.8; }
+        path.country.selected { fill: #e8922e; stroke: #b56a14; stroke-width: 1.2; }
+      </style>`;
       svgString = svgString.replace('</svg>', styles + '</svg>');
 
-      // Create canvas
       const canvas = document.getElementById('export-canvas');
       const scale = 2;
       canvas.width = width * scale;
-      canvas.height = (height + 80) * scale;
+      canvas.height = (height + 100) * scale;
       const ctx = canvas.getContext('2d');
       ctx.scale(scale, scale);
 
-      // Background
       ctx.fillStyle = '#f7f9f4';
-      ctx.fillRect(0, 0, width, height + 80);
+      ctx.fillRect(0, 0, width, height + 100);
 
-      // Ocean background
       ctx.fillStyle = '#dceaf5';
       ctx.beginPath();
-      ctx.roundRect(0, 38, width, height + 4, 10);
+      ctx.roundRect(0, 44, width, height + 4, 10);
       ctx.fill();
 
-      // Title
+      const article = speciesType === 'dier' ? 'het' : 'de';
+      const title = `Waar leeft of groeit ${article} ${speciesName}?`;
       ctx.fillStyle = '#3d6b35';
       ctx.font = 'bold 22px Nunito, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('Waar leeft de bunzing?', width / 2, 30);
+      ctx.fillText(title, width / 2, 32);
 
-      // Selected countries text
-      ctx.fillStyle = '#5a6b57';
-      ctx.font = '12px Nunito, sans-serif';
-      const sorted = [...selected].sort((a,b) => a.localeCompare(b, 'nl'));
-      const countryText = sorted.join(', ');
-      // Wrap text
-      const maxW = width - 60;
-      const words = countryText.split(', ');
-      let lines = [];
-      let line = '';
-      words.forEach(w => {
-        const test = line ? line + ', ' + w : w;
-        if (ctx.measureText(test).width > maxW && line) {
-          lines.push(line);
-          line = w;
-        } else {
-          line = test;
-        }
-      });
-      if (line) lines.push(line);
-
-      // Draw SVG on canvas
       const img = new Image();
       const blob = new Blob([svgString], {type: 'image/svg+xml;charset=utf-8'});
       const url = URL.createObjectURL(blob);
 
       await new Promise((resolve, reject) => {
         img.onload = () => {
-          ctx.drawImage(img, 0, 40, width, height);
+          ctx.drawImage(img, 0, 46, width, height);
           URL.revokeObjectURL(url);
 
-          // Draw country list below map
-          const startY = height + 52;
+          const startY = height + 62;
+          const sorted = [...selected].sort((a,b) => a.localeCompare(b, 'nl'));
+
           ctx.fillStyle = '#3d6b35';
           ctx.font = 'bold 13px Nunito, sans-serif';
           ctx.textAlign = 'left';
@@ -608,9 +744,19 @@
 
           ctx.fillStyle = '#5a6b57';
           ctx.font = '11px Nunito, sans-serif';
-          lines.forEach((l, i) => {
-            ctx.fillText(l, 20, startY + 16 + (i * 14));
+          const countryText = sorted.join(', ');
+          const maxW = width - 60;
+          const words = countryText.split(', ');
+          let lines = [], line = '';
+          words.forEach(w => {
+            const test = line ? line + ', ' + w : w;
+            if (ctx.measureText(test).width > maxW && line) {
+              lines.push(line);
+              line = w;
+            } else { line = test; }
           });
+          if (line) lines.push(line);
+          lines.forEach((l, i) => ctx.fillText(l, 20, startY + 16 + (i * 14)));
 
           resolve();
         };
@@ -618,9 +764,9 @@
         img.src = url;
       });
 
-      // Download
       const link = document.createElement('a');
-      link.download = 'bunzing-wereldkaart.png';
+      const safeName = speciesName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      link.download = `wereldkaart-${safeName}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
     } catch(err) {
@@ -631,7 +777,6 @@
     btnExport.textContent = 'Opslaan als afbeelding';
     btnExport.disabled = selected.size === 0;
   });
-
 })();
 </script>
 </body>
