@@ -1,316 +1,638 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wandel Challenge App</title>
-    <style>
-        :root { --primary: #2ecc71; --dark: #2c3e50; --light: #ecf0f1; --highlight: #f1c40f; }
-        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: var(--light); margin: 0; padding: 20px; color: var(--dark); }
-        .container { max-width: 500px; margin: 0 auto; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); position: relative; }
-        
-        /* Navigatie */
-        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--dark); color: white; }
-        .settings-btn { background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Waar leeft de Bunzing?</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
 
-        /* Views */
-        .view { display: none; padding: 20px; }
-        .active-view { display: block; }
-        
-        /* Dashboard Styling */
-        .section-box { margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
-        .section-title { font-size: 0.85rem; text-transform: uppercase; color: #7f8c8d; letter-spacing: 1px; margin-bottom: 10px; font-weight: bold; }
-        .big-stat { font-size: 1.6rem; font-weight: bold; color: var(--dark); }
-        .sub-stat { color: #7f8c8d; font-size: 0.9rem; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* Progress Bar */
-        .progress-track { background: #eee; height: 15px; border-radius: 8px; margin: 10px 0; overflow: hidden; position: relative; }
-        .progress-fill { background: var(--primary); height: 100%; width: 0%; transition: width 0.5s; }
-        
-        /* Input Area */
-        .input-row { display: flex; gap: 10px; margin-top: 5px; }
-        select, input { padding: 12px; border: 2px solid #eee; border-radius: 8px; flex: 1; }
-        .btn-action { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        
-        /* Route Kiezer Styling */
-        .route-card { border: 2px solid #eee; padding: 15px; border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
-        .route-card:hover { border-color: var(--primary); background: #f9fff9; }
-        .route-card h4 { margin: 0 0 5px 0; }
-        
-        /* Leaderboard */
-        .list-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f1f1f1; }
-        
-        #loadingOverlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); align-items:center; justify-content:center; z-index:99; }
-    </style>
+  :root {
+    --bg: #f7f9f4;
+    --card: #ffffff;
+    --ocean: #dceaf5;
+    --green-soft: #6a9f5c;
+    --green-dark: #3d6b35;
+    --green-light: #b0c9a5;
+    --green-selected: #e8922e;
+    --text: #2e3a2c;
+    --text-light: #5a6b57;
+    --border: #d0ddc9;
+    --hover: #e8f0e4;
+    --shadow: rgba(61, 107, 53, 0.08);
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--green-dark);
+    margin-bottom: 4px;
+  }
+
+  .header p {
+    font-size: 0.95rem;
+    color: var(--text-light);
+    max-width: 500px;
+    line-height: 1.5;
+  }
+
+  .map-container {
+    background: var(--card);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 12px var(--shadow);
+    padding: 16px;
+    width: 100%;
+    max-width: 960px;
+    position: relative;
+  }
+
+  #map-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    cursor: crosshair;
+    background: var(--ocean);
+    border-radius: 10px;
+  }
+
+  #map-svg path.country {
+    fill: var(--green-light);
+    stroke: #ffffff;
+    stroke-width: 0.8;
+    transition: fill 0.15s ease;
+    cursor: pointer;
+  }
+
+  #map-svg path.country:hover {
+    fill: #c8ddbf;
+    stroke: var(--green-dark);
+    stroke-width: 1.2;
+  }
+
+  #map-svg path.country.selected {
+    fill: var(--green-selected);
+    stroke: #b56a14;
+    stroke-width: 1.2;
+  }
+
+  #map-svg path.country.selected:hover {
+    fill: #d47f1e;
+  }
+
+  .controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+
+  .btn {
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .btn-primary {
+    background: var(--green-soft);
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    background: var(--green-dark);
+  }
+
+  .btn-secondary {
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover {
+    background: var(--hover);
+  }
+
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .info-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: var(--bg);
+    border-radius: 10px;
+    font-size: 0.85rem;
+    color: var(--text-light);
+  }
+
+  .counter {
+    font-weight: 700;
+    color: var(--green-dark);
+    font-size: 1rem;
+  }
+
+  .selected-list {
+    margin-top: 16px;
+    max-width: 960px;
+    width: 100%;
+  }
+
+  .selected-list h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--green-dark);
+    margin-bottom: 8px;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .tag {
+    background: #f5ddb8;
+    color: #8a5510;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .tag:hover {
+    background: #e8922e;
+    color: #fff;
+  }
+
+  .tooltip {
+    position: fixed;
+    background: var(--text);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 6px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.1s ease;
+    z-index: 100;
+    white-space: nowrap;
+  }
+
+  .loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    color: var(--text-light);
+    font-size: 1rem;
+  }
+
+  .spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--border);
+    border-top-color: var(--green-soft);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 12px;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Export overlay styling for the hidden canvas */
+  #export-canvas { display: none; }
+
+  .legend {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 10px;
+    font-size: 0.8rem;
+    color: var(--text-light);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .legend-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+</style>
 </head>
 <body>
 
-<div id="loadingOverlay">Data ophalen...</div>
-
-<div class="container">
-    
-    <div class="top-bar">
-        <span id="headerTitle">Via Francigena</span>
-        <button class="settings-btn" onclick="toggleRouteScreen()">⚙️</button>
-    </div>
-
-    <div id="view-dashboard" class="view active-view">
-        
-        <div class="section-box" style="text-align: center;">
-            <div class="section-title">Huidige Locatie</div>
-            <div class="big-stat" id="currentLocation">Laden...</div>
-            <div class="sub-stat">Volgende: <span id="nextStopName">...</span> (<span id="nextStopDist">...</span> km)</div>
-        </div>
-
-        <div class="section-box">
-            <div class="section-title">Voortgang Route</div>
-            <div class="progress-track"><div class="progress-fill" id="progBar"></div></div>
-            <div style="display:flex; justify-content:space-between; font-size:0.9rem;">
-                <strong><span id="totalKmDisplay">0</span> km</strong>
-                <span style="color:#999;">Totaal: <span id="routeTotalDisplay">2040</span> km</span>
-            </div>
-        </div>
-
-        <div class="section-box">
-            <div class="section-title">Kilometers Toevoegen</div>
-            <div style="background: #f8f9fa; padding: 15px; border-radius: 10px;">
-                <label style="font-size:0.8rem; color:#666;">Wie ben je?</label>
-                <select id="userSelect" style="width:100%; margin-bottom:10px;">
-                    <option value="Rowland">Rowland</option>
-                    <option value="Henk">Henk</option>
-                    <option value="Jolien">Jolien</option>
-                    <option value="Jan">Jan</option>
-                    <option value="Maria">Maria</option>
-                    <option value="Celine">Celine</option>
-                    <option value="Nienke">Nienke</option>
-                    <option value="Stefan">Stefan</option>
-                </select>
-                
-                <div class="input-row">
-                    <input type="number" id="inputKm" placeholder="Aantal KM">
-                    <button class="btn-action" onclick="submitKm()">+</button>
-                </div>
-            </div>
-        </div>
-
-        <div>
-            <div class="section-title">Team Stand</div>
-            <div id="teamList"></div>
-            <button onclick="fetchData()" style="margin-top:15px; width:100%; padding:8px; background:none; border:1px solid #ddd; border-radius:6px; cursor:pointer; color:#777;">🔄 Data Verversen</button>
-        </div>
-    </div>
-
-    <div id="view-routes" class="view">
-        <h2>Kies of Maak een Route</h2>
-        <p style="color:#666; font-size:0.9rem;">Selecteer een route. De afstanden en steden worden direct geladen.</p>
-
-        <div class="route-card" onclick="setRoute('francigena')">
-            <h4>🇮🇹 Via Francigena</h4>
-            <p style="margin:0; font-size:0.85rem; color:#666;">Canterbury naar Rome (2040 km)</p>
-        </div>
-
-        <div class="route-card" onclick="setRoute('santiago')">
-            <h4>🇪🇸 Santiago de Compostela</h4>
-            <p style="margin:0; font-size:0.85rem; color:#666;">Camino Francés (780 km)</p>
-        </div>
-
-        <div class="route-card" onclick="setRoute('pieterpad')">
-            <h4>🇳🇱 Pieterpad</h4>
-            <p style="margin:0; font-size:0.85rem; color:#666;">Pieterburen naar St. Pietersberg (500 km)</p>
-        </div>
-
-        <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
-
-        <h3>➕ Eigen Route Maken</h3>
-        <label style="font-size:0.8rem;">Naam van route:</label>
-        <input type="text" id="customName" placeholder="Bijv. Rondje IJsselmeer">
-        <label style="font-size:0.8rem;">Totale afstand (km):</label>
-        <input type="number" id="customDist" placeholder="Bijv. 400">
-        <button class="btn-action" style="width:100%; margin-top:10px;" onclick="createCustomRoute()">Maak en Start</button>
-
-        <button onclick="toggleRouteScreen()" style="margin-top:20px; width:100%; background:none; border:none; text-decoration:underline; cursor:pointer;">Annuleren / Terug</button>
-    </div>
-
+<div class="header">
+  <h1>Waar leeft de bunzing?</h1>
+  <p>Klik op de landen waar de bunzing voorkomt. Klik nogmaals om een land te deselecteren.</p>
 </div>
 
+<div class="map-container" id="map-container">
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    Kaart laden...
+  </div>
+  <svg id="map-svg" viewBox="0 0 960 500" xmlns="http://www.w3.org/2000/svg" style="display:none;"></svg>
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-swatch" style="background: var(--green-light);"></div>
+      Niet geselecteerd
+    </div>
+    <div class="legend-item">
+      <div class="legend-swatch" style="background: var(--green-selected);"></div>
+      Bunzing leeft hier
+    </div>
+  </div>
+  <div class="info-bar">
+    <span>Geselecteerde landen: <span class="counter" id="counter">0</span></span>
+    <span id="hover-name" style="font-weight:600; color: var(--green-dark);"></span>
+  </div>
+</div>
+
+<div class="controls">
+  <button class="btn btn-primary" id="btn-export" disabled>Opslaan als afbeelding</button>
+  <button class="btn btn-secondary" id="btn-reset" disabled>Opnieuw beginnen</button>
+</div>
+
+<div class="selected-list" id="selected-list" style="display:none;">
+  <h3>Geselecteerde landen:</h3>
+  <div class="tags" id="tags"></div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+<canvas id="export-canvas"></canvas>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <script>
-    // --- CONFIGURATIE ---
-    // JOUW GOOGLE SCRIPT LINK:
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwdGKnox2pyZojjHltST1_wkATIbIyTSNoxwB-KLuYVuiCKMa-QPCNa7qw1AcYL4FOM/exec"; 
-    
-    // Database van Routes (Presets)
-    const ROUTE_DB = {
-        'francigena': {
-            name: "Via Francigena",
-            totalKm: 2040,
-            checkpoints: [
-                { name: "Canterbury", km: 0 }, { name: "Calais", km: 32 }, { name: "Arras", km: 150 },
-                { name: "Reims", km: 350 }, { name: "Besançon", km: 700 }, { name: "Lausanne", km: 820 },
-                { name: "Gr. St. Bernhardpas", km: 950 }, { name: "Aosta", km: 990 }, { name: "Pavia", km: 1150 },
-                { name: "Lucca", km: 1400 }, { name: "Siena", km: 1550 }, { name: "Viterbo", km: 1900 }, { name: "Rome", km: 2040 }
-            ]
-        },
-        'santiago': {
-            name: "Camino Francés",
-            totalKm: 780,
-            checkpoints: [
-                { name: "St. Jean Pied de Port", km: 0 }, { name: "Pamplona", km: 70 }, { name: "Logroño", km: 170 },
-                { name: "Burgos", km: 290 }, { name: "León", km: 470 }, { name: "Astorga", km: 520 },
-                { name: "Ponferrada", km: 575 }, { name: "Sarria", km: 665 }, { name: "Santiago de Compostela", km: 780 }
-            ]
-        },
-        'pieterpad': {
-            name: "Pieterpad",
-            totalKm: 500,
-            checkpoints: [
-                { name: "Pieterburen", km: 0 }, { name: "Groningen", km: 30 }, { name: "Coevorden", km: 150 },
-                { name: "Ommen", km: 190 }, { name: "Vorden", km: 280 }, { name: "Montferland", km: 330 },
-                { name: "Groesbeek", km: 370 }, { name: "Venlo", km: 420 }, { name: "Sint Pietersberg", km: 500 }
-            ]
-        }
-    };
+(async function() {
+  const svg = d3.select('#map-svg');
+  const width = 960;
+  const height = 500;
+  const selected = new Set();
 
-    // Huidige State
-    let activeRoute = ROUTE_DB['francigena']; // Start direct met Francigena
-    let usersData = {};
+  // Country name translations (common ones to Dutch)
+  const nlNames = {
+    'Afghanistan':'Afghanistan','Albania':'Albanië','Algeria':'Algerije','Angola':'Angola',
+    'Argentina':'Argentinië','Armenia':'Armenië','Australia':'Australië','Austria':'Oostenrijk',
+    'Azerbaijan':'Azerbeidzjan','Bangladesh':'Bangladesh','Belarus':'Belarus','Belgium':'België',
+    'Bolivia':'Bolivia','Bosnia and Herz.':'Bosnië-Herzegovina','Botswana':'Botswana',
+    'Brazil':'Brazilië','Bulgaria':'Bulgarije','Cambodia':'Cambodja','Cameroon':'Kameroen',
+    'Canada':'Canada','Central African Rep.':'Centraal-Afrikaanse Republiek','Chad':'Tsjaad',
+    'Chile':'Chili','China':'China','Colombia':'Colombia','Congo':'Congo',
+    'Costa Rica':'Costa Rica','Croatia':'Kroatië','Cuba':'Cuba','Cyprus':'Cyprus',
+    'Czechia':'Tsjechië','Dem. Rep. Congo':'Democratische Republiek Congo','Denmark':'Denemarken',
+    'Dominican Rep.':'Dominicaanse Republiek','Ecuador':'Ecuador','Egypt':'Egypte',
+    'El Salvador':'El Salvador','Eq. Guinea':'Equatoriaal-Guinea','Eritrea':'Eritrea',
+    'Estonia':'Estland','eSwatini':'Eswatini','Ethiopia':'Ethiopië','Finland':'Finland',
+    'France':'Frankrijk','Gabon':'Gabon','Gambia':'Gambia','Georgia':'Georgië',
+    'Germany':'Duitsland','Ghana':'Ghana','Greece':'Griekenland','Guatemala':'Guatemala',
+    'Guinea':'Guinee','Guinea-Bissau':'Guinee-Bissau','Guyana':'Guyana','Haiti':'Haïti',
+    'Honduras':'Honduras','Hungary':'Hongarije','Iceland':'IJsland','India':'India',
+    'Indonesia':'Indonesië','Iran':'Iran','Iraq':'Irak','Ireland':'Ierland',
+    'Israel':'Israël','Italy':'Italië','Ivory Coast':'Ivoorkust','Jamaica':'Jamaica',
+    'Japan':'Japan','Jordan':'Jordanië','Kazakhstan':'Kazachstan','Kenya':'Kenia',
+    'Kosovo':'Kosovo','Kuwait':'Koeweit','Kyrgyzstan':'Kirgizië','Laos':'Laos',
+    'Latvia':'Letland','Lebanon':'Libanon','Lesotho':'Lesotho','Liberia':'Liberia',
+    'Libya':'Libië','Lithuania':'Litouwen','Luxembourg':'Luxemburg','Madagascar':'Madagaskar',
+    'Malawi':'Malawi','Malaysia':'Maleisië','Mali':'Mali','Mauritania':'Mauritanië',
+    'Mexico':'Mexico','Moldova':'Moldavië','Mongolia':'Mongolië','Montenegro':'Montenegro',
+    'Morocco':'Marokko','Mozambique':'Mozambique','Myanmar':'Myanmar','Namibia':'Namibië',
+    'Nepal':'Nepal','Netherlands':'Nederland','New Zealand':'Nieuw-Zeeland','Nicaragua':'Nicaragua',
+    'Niger':'Niger','Nigeria':'Nigeria','North Korea':'Noord-Korea','North Macedonia':'Noord-Macedonië',
+    'Norway':'Noorwegen','Oman':'Oman','Pakistan':'Pakistan','Panama':'Panama',
+    'Papua New Guinea':'Papoea-Nieuw-Guinea','Paraguay':'Paraguay','Peru':'Peru',
+    'Philippines':'Filipijnen','Poland':'Polen','Portugal':'Portugal','Puerto Rico':'Puerto Rico',
+    'Qatar':'Qatar','Romania':'Roemenië','Russia':'Rusland','Rwanda':'Rwanda',
+    'Saudi Arabia':'Saoedi-Arabië','Senegal':'Senegal','Serbia':'Servië',
+    'Sierra Leone':'Sierra Leone','Slovakia':'Slowakije','Slovenia':'Slovenië',
+    'Solomon Is.':'Salomonseilanden','Somalia':'Somalië','South Africa':'Zuid-Afrika',
+    'South Korea':'Zuid-Korea','S. Sudan':'Zuid-Soedan','Spain':'Spanje','Sri Lanka':'Sri Lanka',
+    'Sudan':'Soedan','Suriname':'Suriname','Sweden':'Zweden','Switzerland':'Zwitserland',
+    'Syria':'Syrië','Taiwan':'Taiwan','Tajikistan':'Tadzjikistan','Tanzania':'Tanzania',
+    'Thailand':'Thailand','Timor-Leste':'Oost-Timor','Togo':'Togo','Trinidad and Tobago':'Trinidad en Tobago',
+    'Tunisia':'Tunesië','Turkey':'Turkije','Turkmenistan':'Turkmenistan','Uganda':'Oeganda',
+    'Ukraine':'Oekraïne','United Arab Emirates':'Ver. Arabische Emiraten','United Kingdom':'Verenigd Koninkrijk',
+    'United States of America':'Verenigde Staten','Uruguay':'Uruguay','Uzbekistan':'Oezbekistan',
+    'Venezuela':'Venezuela','Vietnam':'Vietnam','W. Sahara':'Westelijke Sahara',
+    'Yemen':'Jemen','Zambia':'Zambia','Zimbabwe':'Zimbabwe',
+    'Côte d\'Ivoire':'Ivoorkust','Dem. Rep. Korea':'Noord-Korea','Falkland Is.':'Falklandeilanden',
+    'Fr. S. Antarctic Lands':'Franse Zuidelijke Gebieden','Greenland':'Groenland',
+    'New Caledonia':'Nieuw-Caledonië','Palestine':'Palestina','Rep. of Korea':'Zuid-Korea',
+    'Somaliland':'Somaliland','Vanuatu':'Vanuatu','Antarctica':'Antarctica'
+  };
 
-    // --- INITIALISATIE ---
-    window.onload = function() {
-        // Direct laden
-        updateUIConfig();
-        fetchData();
-    };
+  function getName(props) {
+    const en = props.name;
+    return nlNames[en] || en || 'Onbekend';
+  }
 
-    // --- NAVIGATIE & ROUTE LOGICA ---
-    function toggleRouteScreen() {
-        const dashboard = document.getElementById('view-dashboard');
-        const routes = document.getElementById('view-routes');
-        
-        if (routes.style.display === 'block') {
-            routes.style.display = 'none';
-            dashboard.style.display = 'block';
+  // Load world data
+  let world;
+  try {
+    const resp = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
+    world = await resp.json();
+  } catch(e) {
+    try {
+      const resp2 = await fetch('https://unpkg.com/world-atlas@2.0.2/countries-110m.json');
+      world = await resp2.json();
+    } catch(e2) {
+      document.getElementById('loading').innerHTML = '<p>Kaart kon niet geladen worden. Controleer je internetverbinding.</p>';
+      return;
+    }
+  }
+
+  const countries = topojson.feature(world, world.objects.countries);
+
+  // We need country names - load from a separate source or use the ID mapping
+  // Use Natural Earth 110m with names
+  let namesWorld;
+  try {
+    const resp = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
+    namesWorld = await resp.json();
+  } catch(e) {}
+
+  // Country ID to name mapping (ISO 3166-1 numeric)
+  const idToName = {
+    '004':'Afghanistan','008':'Albania','012':'Algeria','024':'Angola','032':'Argentina',
+    '051':'Armenia','036':'Australia','040':'Austria','031':'Azerbaijan','050':'Bangladesh',
+    '112':'Belarus','056':'Belgium','068':'Bolivia','070':'Bosnia and Herz.','072':'Botswana',
+    '076':'Brazil','100':'Bulgaria','116':'Cambodia','120':'Cameroon','124':'Canada',
+    '140':'Central African Rep.','148':'Chad','152':'Chile','156':'China','170':'Colombia',
+    '178':'Congo','188':'Costa Rica','191':'Croatia','192':'Cuba','196':'Cyprus',
+    '203':'Czechia','180':'Dem. Rep. Congo','208':'Denmark','214':'Dominican Rep.',
+    '218':'Ecuador','818':'Egypt','222':'El Salvador','226':'Eq. Guinea','232':'Eritrea',
+    '233':'Estonia','748':'eSwatini','231':'Ethiopia','246':'Finland','250':'France',
+    '266':'Gabon','270':'Gambia','268':'Georgia','276':'Germany','288':'Ghana',
+    '300':'Greece','320':'Guatemala','324':'Guinea','624':'Guinea-Bissau','328':'Guyana',
+    '332':'Haiti','340':'Honduras','348':'Hungary','352':'Iceland','356':'India',
+    '360':'Indonesia','364':'Iran','368':'Iraq','372':'Ireland','376':'Israel',
+    '380':'Italy','388':'Jamaica','392':'Japan','400':'Jordan','398':'Kazakhstan',
+    '404':'Kenya','0':'Kosovo','414':'Kuwait','417':'Kyrgyzstan','418':'Laos',
+    '428':'Latvia','422':'Lebanon','426':'Lesotho','430':'Liberia','434':'Libya',
+    '440':'Lithuania','442':'Luxembourg','450':'Madagascar','454':'Malawi','458':'Malaysia',
+    '466':'Mali','478':'Mauritania','484':'Mexico','498':'Moldova','496':'Mongolia',
+    '499':'Montenegro','504':'Morocco','508':'Mozambique','104':'Myanmar','516':'Namibia',
+    '524':'Nepal','528':'Netherlands','554':'New Zealand','558':'Nicaragua','562':'Niger',
+    '566':'Nigeria','408':'North Korea','807':'North Macedonia','578':'Norway','512':'Oman',
+    '586':'Pakistan','591':'Panama','598':'Papua New Guinea','600':'Paraguay','604':'Peru',
+    '608':'Philippines','616':'Poland','620':'Portugal','630':'Puerto Rico','634':'Qatar',
+    '642':'Romania','643':'Russia','646':'Rwanda','682':'Saudi Arabia','686':'Senegal',
+    '688':'Serbia','694':'Sierra Leone','703':'Slovakia','705':'Slovenia','090':'Solomon Is.',
+    '706':'Somalia','710':'South Africa','410':'South Korea','728':'S. Sudan','724':'Spain',
+    '144':'Sri Lanka','729':'Sudan','740':'Suriname','752':'Sweden','756':'Switzerland',
+    '760':'Syria','158':'Taiwan','762':'Tajikistan','834':'Tanzania','764':'Thailand',
+    '626':'Timor-Leste','768':'Togo','780':'Trinidad and Tobago','788':'Tunisia',
+    '792':'Turkey','795':'Turkmenistan','800':'Uganda','804':'Ukraine',
+    '784':'United Arab Emirates','826':'United Kingdom','840':'United States of America',
+    '858':'Uruguay','860':'Uzbekistan','862':'Venezuela','704':'Vietnam',
+    '732':'W. Sahara','887':'Yemen','894':'Zambia','716':'Zimbabwe',
+    '304':'Greenland','540':'New Caledonia','238':'Falkland Is.','010':'Antarctica',
+    '260':'Fr. S. Antarctic Lands','548':'Vanuatu','275':'Palestine','-99':'Somaliland',
+    '384':'Côte d\'Ivoire'
+  };
+
+  // Assign names to features
+  countries.features.forEach(f => {
+    const id = String(f.id);
+    f.properties.name = idToName[id] || f.properties.name || 'Onbekend';
+  });
+
+  const projection = d3.geoNaturalEarth1()
+    .fitSize([width, height], countries);
+
+  const path = d3.geoPath().projection(projection);
+
+  // Draw countries
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('map-svg').style.display = 'block';
+
+  const tooltip = document.getElementById('tooltip');
+  const counter = document.getElementById('counter');
+  const hoverName = document.getElementById('hover-name');
+  const btnExport = document.getElementById('btn-export');
+  const btnReset = document.getElementById('btn-reset');
+  const selectedList = document.getElementById('selected-list');
+  const tagsEl = document.getElementById('tags');
+
+  svg.selectAll('path.country')
+    .data(countries.features)
+    .enter()
+    .append('path')
+    .attr('class', 'country')
+    .attr('d', path)
+    .on('click', function(event, d) {
+      const name = getName(d.properties);
+      if (name === 'Onbekend' || name === 'Antarctica') return;
+
+      if (selected.has(name)) {
+        selected.delete(name);
+        d3.select(this).classed('selected', false);
+      } else {
+        selected.add(name);
+        d3.select(this).classed('selected', true);
+      }
+      updateUI();
+    })
+    .on('mouseenter', function(event, d) {
+      const name = getName(d.properties);
+      if (name === 'Antarctica') return;
+      hoverName.textContent = name;
+      tooltip.textContent = name;
+      tooltip.style.opacity = '1';
+    })
+    .on('mousemove', function(event) {
+      tooltip.style.left = (event.clientX + 12) + 'px';
+      tooltip.style.top = (event.clientY - 30) + 'px';
+    })
+    .on('mouseleave', function() {
+      hoverName.textContent = '';
+      tooltip.style.opacity = '0';
+    });
+
+  function updateUI() {
+    const count = selected.size;
+    counter.textContent = count;
+    btnExport.disabled = count === 0;
+    btnReset.disabled = count === 0;
+
+    if (count > 0) {
+      selectedList.style.display = 'block';
+      const sorted = [...selected].sort((a,b) => a.localeCompare(b, 'nl'));
+      tagsEl.innerHTML = sorted.map(n =>
+        `<span class="tag" data-name="${n}">${n} ×</span>`
+      ).join('');
+
+      // Click tag to deselect
+      tagsEl.querySelectorAll('.tag').forEach(tag => {
+        tag.addEventListener('click', () => {
+          const name = tag.dataset.name;
+          selected.delete(name);
+          svg.selectAll('path.country')
+            .filter(d => getName(d.properties) === name)
+            .classed('selected', false);
+          updateUI();
+        });
+      });
+    } else {
+      selectedList.style.display = 'none';
+    }
+  }
+
+  // Reset
+  btnReset.addEventListener('click', () => {
+    selected.clear();
+    svg.selectAll('path.country').classed('selected', false);
+    updateUI();
+  });
+
+  // Export as image
+  btnExport.addEventListener('click', async () => {
+    btnExport.textContent = 'Bezig met opslaan...';
+    btnExport.disabled = true;
+
+    try {
+      const svgEl = document.getElementById('map-svg');
+      const serializer = new XMLSerializer();
+      let svgString = serializer.serializeToString(svgEl);
+
+      // Get computed styles and inline them
+      const styles = `
+        <style>
+          path.country { fill: #b0c9a5; stroke: #fff; stroke-width: 0.8; }
+          path.country.selected { fill: #e8922e; stroke: #b56a14; stroke-width: 1.2; }
+        </style>
+      `;
+      svgString = svgString.replace('</svg>', styles + '</svg>');
+
+      // Create canvas
+      const canvas = document.getElementById('export-canvas');
+      const scale = 2;
+      canvas.width = width * scale;
+      canvas.height = (height + 80) * scale;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(scale, scale);
+
+      // Background
+      ctx.fillStyle = '#f7f9f4';
+      ctx.fillRect(0, 0, width, height + 80);
+
+      // Ocean background
+      ctx.fillStyle = '#dceaf5';
+      ctx.beginPath();
+      ctx.roundRect(0, 38, width, height + 4, 10);
+      ctx.fill();
+
+      // Title
+      ctx.fillStyle = '#3d6b35';
+      ctx.font = 'bold 22px Nunito, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Waar leeft de bunzing?', width / 2, 30);
+
+      // Selected countries text
+      ctx.fillStyle = '#5a6b57';
+      ctx.font = '12px Nunito, sans-serif';
+      const sorted = [...selected].sort((a,b) => a.localeCompare(b, 'nl'));
+      const countryText = sorted.join(', ');
+      // Wrap text
+      const maxW = width - 60;
+      const words = countryText.split(', ');
+      let lines = [];
+      let line = '';
+      words.forEach(w => {
+        const test = line ? line + ', ' + w : w;
+        if (ctx.measureText(test).width > maxW && line) {
+          lines.push(line);
+          line = w;
         } else {
-            dashboard.style.display = 'none';
-            routes.style.display = 'block';
+          line = test;
         }
-    }
+      });
+      if (line) lines.push(line);
 
-    function setRoute(key) {
-        activeRoute = ROUTE_DB[key];
-        // We resetten de data NIET in de database (omdat we 1 sheet delen in dit prototype),
-        // maar visueel verandert de route.
-        updateUIConfig();
-        toggleRouteScreen();
-        fetchData(); // Herlaad data
-    }
+      // Draw SVG on canvas
+      const img = new Image();
+      const blob = new Blob([svgString], {type: 'image/svg+xml;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
 
-    function createCustomRoute() {
-        const name = document.getElementById('customName').value;
-        const dist = parseFloat(document.getElementById('customDist').value);
+      await new Promise((resolve, reject) => {
+        img.onload = () => {
+          ctx.drawImage(img, 0, 40, width, height);
+          URL.revokeObjectURL(url);
 
-        if(!name || !dist) { alert("Vul naam en afstand in."); return; }
+          // Draw country list below map
+          const startY = height + 52;
+          ctx.fillStyle = '#3d6b35';
+          ctx.font = 'bold 13px Nunito, sans-serif';
+          ctx.textAlign = 'left';
+          ctx.fillText(`${selected.size} landen geselecteerd:`, 20, startY);
 
-        // Genereer automatische checkpoints (wiskundig)
-        let generatedPoints = [];
-        generatedPoints.push({ name: "Start", km: 0 });
-        generatedPoints.push({ name: "20% Checkpoint", km: dist * 0.2 });
-        generatedPoints.push({ name: "40% Checkpoint", km: dist * 0.4 });
-        generatedPoints.push({ name: "Halverwege!", km: dist * 0.5 });
-        generatedPoints.push({ name: "80% Checkpoint", km: dist * 0.8 });
-        generatedPoints.push({ name: "Finish: " + name, km: dist });
+          ctx.fillStyle = '#5a6b57';
+          ctx.font = '11px Nunito, sans-serif';
+          lines.forEach((l, i) => {
+            ctx.fillText(l, 20, startY + 16 + (i * 14));
+          });
 
-        activeRoute = {
-            name: name,
-            totalKm: dist,
-            checkpoints: generatedPoints
+          resolve();
         };
+        img.onerror = reject;
+        img.src = url;
+      });
 
-        updateUIConfig();
-        toggleRouteScreen();
-        fetchData();
+      // Download
+      const link = document.createElement('a');
+      link.download = 'bunzing-wereldkaart.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch(err) {
+      console.error('Export fout:', err);
+      alert('Er ging iets mis bij het opslaan. Probeer het opnieuw.');
     }
 
-    function updateUIConfig() {
-        document.getElementById('headerTitle').innerText = activeRoute.name;
-        document.getElementById('routeTotalDisplay').innerText = activeRoute.totalKm;
-    }
+    btnExport.textContent = 'Opslaan als afbeelding';
+    btnExport.disabled = selected.size === 0;
+  });
 
-    // --- DATA FUNCTIES (Google Sheets) ---
-    function fetchData() {
-        document.getElementById('loadingOverlay').style.display = 'flex';
-        fetch(GOOGLE_SCRIPT_URL)
-            .then(response => response.json())
-            .then(data => {
-                usersData = data;
-                renderDashboard();
-                document.getElementById('loadingOverlay').style.display = 'none';
-            })
-            .catch(e => {
-                document.getElementById('loadingOverlay').style.display = 'none';
-                console.error(e);
-            });
-    }
-
-    function submitKm() {
-        const input = document.getElementById('inputKm');
-        const user = document.getElementById('userSelect').value;
-        const km = parseFloat(input.value);
-
-        if (!km || km <= 0) return;
-
-        document.getElementById('loadingOverlay').style.display = 'flex';
-        const formData = new FormData();
-        formData.append('naam', user);
-        formData.append('km', km);
-
-        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: formData })
-        .then(() => {
-            input.value = '';
-            fetchData();
-        });
-    }
-
-    function renderDashboard() {
-        // Totaal berekenen
-        const allNames = ["Rowland", "Henk", "Jolien", "Jan", "Maria", "Celine", "Nienke", "Stefan"];
-        let totalWalked = 0;
-        let displayList = [];
-
-        allNames.forEach(name => {
-            let km = usersData[name] || 0;
-            totalWalked += km;
-            displayList.push({ name: name, km: km });
-        });
-
-        const percentage = Math.min(100, (totalWalked / activeRoute.totalKm) * 100);
-
-        // Checkpoints berekenen
-        let passedPoints = [...activeRoute.checkpoints].reverse().filter(p => p.km <= totalWalked);
-        let currentCity = passedPoints.length > 0 ? passedPoints[0] : activeRoute.checkpoints[0];
-        let nextCity = activeRoute.checkpoints.find(p => p.km > totalWalked);
-
-        // UI vullen
-        document.getElementById('currentLocation').innerText = currentCity.name;
-        document.getElementById('totalKmDisplay').innerText = totalWalked.toFixed(1);
-        document.getElementById('progBar').style.width = percentage + "%";
-
-        if (nextCity) {
-            document.getElementById('nextStopName').innerText = nextCity.name;
-            document.getElementById('nextStopDist').innerText = (nextCity.km - totalWalked).toFixed(1);
-        } else {
-            document.getElementById('nextStopName').innerText = "Finish bereikt!";
-            document.getElementById('nextStopDist').innerText = "0";
-        }
-
-        // Lijst updaten
-        const listEl = document.getElementById('teamList');
-        listEl.innerHTML = '';
-        displayList.sort((a,b) => b.km - a.km);
-        displayList.forEach(u => {
-            listEl.innerHTML += `<div class="list-item"><span>${u.name}</span><span>${u.km.toFixed(1)} km</span></div>`;
-        });
-    }
+})();
 </script>
-
 </body>
 </html>
