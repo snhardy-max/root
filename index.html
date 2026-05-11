@@ -2,782 +2,1095 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Waar leeft of groeit jouw soort?</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>StageSimulator</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --green: #2ecc71; --green-d: #27ae60;
+  --orange: #e67e22; --orange-d: #d35400;
+  --red: #e74c3c; --red-d: #c0392b;
+  --blue: #3498db; --blue-d: #2980b9;
+  --yellow: #f1c40f; --yellow-d: #f39c12;
+  --purple: #9b59b6; --purple-d: #8e44ad;
+  --bg: #1a1a2e; --card: #16213e; --card2: #0f3460;
+  --text: #eee; --muted: #aaa;
+  --radius: 16px; --radius-sm: 10px;
+}
 
-  :root {
-    --bg: #f7f9f4;
-    --card: #ffffff;
-    --ocean: #dceaf5;
-    --land: #b0c9a5;
-    --land-hover: #c8ddbf;
-    --land-stroke: #ffffff;
-    --selected: #e8922e;
-    --selected-dark: #b56a14;
-    --selected-hover: #d47f1e;
-    --selected-light: #f5ddb8;
-    --green-soft: #6a9f5c;
-    --green-dark: #3d6b35;
-    --text: #2e3a2c;
-    --text-light: #5a6b57;
-    --border: #d0ddc9;
-    --shadow: rgba(61, 107, 53, 0.08);
-  }
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center;
+  overflow-x: hidden;
+}
 
-  body {
-    font-family: 'Nunito', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-  }
+/* ── SCREENS ── */
+.screen { display: none; width: 100%; max-width: 680px; padding: 1rem; min-height: 100vh; flex-direction: column; align-items: center; }
+.screen.active { display: flex; }
 
-  /* ---- INTRO SCREEN ---- */
-  .intro {
-    max-width: 440px;
-    width: 100%;
-    background: var(--card);
-    border-radius: 16px;
-    border: 1px solid var(--border);
-    box-shadow: 0 2px 12px var(--shadow);
-    padding: 32px 28px;
-    text-align: center;
-    margin-top: 40px;
-  }
+/* ── HOME ── */
+#home { justify-content: center; gap: 1.5rem; text-align: center; padding: 2rem 1rem; }
+.logo { font-size: 3rem; }
+.home-title { font-size: 2rem; font-weight: 900; line-height: 1.1; }
+.home-title span { color: var(--yellow); }
+.home-sub { color: var(--muted); font-size: 1rem; }
 
-  .intro h1 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--green-dark);
-    margin-bottom: 6px;
-  }
+.place-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; width: 100%; margin-top: 0.5rem; }
+.place-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 1.5rem 1rem;
+  cursor: pointer;
+  border: 3px solid transparent;
+  transition: all 0.2s;
+  display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+}
+.place-card:hover, .place-card:active { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+.place-card .icon { font-size: 2.8rem; }
+.place-card .name { font-weight: 800; font-size: 1rem; }
+.place-card .tagline { font-size: 0.75rem; color: var(--muted); }
+.place-card.intratuin { border-color: var(--green); }
+.place-card.intratuin:hover { background: rgba(46,204,113,0.1); }
+.place-card.papendal { border-color: var(--blue); }
+.place-card.papendal:hover { background: rgba(52,152,219,0.1); }
+.place-card.mcdonalds { border-color: var(--yellow); }
+.place-card.mcdonalds:hover { background: rgba(241,196,15,0.1); }
+.place-card.scalabor { border-color: var(--purple); }
+.place-card.scalabor:hover { background: rgba(155,89,182,0.1); }
 
-  .intro p {
-    font-size: 0.95rem;
-    color: var(--text-light);
-    line-height: 1.5;
-    margin-bottom: 20px;
-  }
+/* ── ROLE SELECT ── */
+#roleselect { justify-content: flex-start; gap: 1rem; padding-top: 1.5rem; }
+.back-btn {
+  align-self: flex-start;
+  background: transparent; border: 2px solid var(--muted);
+  color: var(--muted); border-radius: 999px; padding: 0.4rem 1rem;
+  font-family: 'Nunito', sans-serif; font-size: 0.9rem; cursor: pointer;
+  transition: all 0.15s;
+}
+.back-btn:hover { border-color: var(--text); color: var(--text); }
+.section-title { font-size: 1.4rem; font-weight: 800; text-align: center; }
+.section-sub { color: var(--muted); font-size: 0.9rem; text-align: center; }
+.role-grid { display: grid; grid-template-columns: 1fr; gap: 0.75rem; width: 100%; }
+.role-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 1.2rem 1.5rem;
+  cursor: pointer;
+  border: 3px solid transparent;
+  transition: all 0.2s;
+  display: flex; align-items: center; gap: 1rem;
+}
+.role-card:hover { transform: translateX(4px); }
+.role-card .role-icon { font-size: 2rem; flex-shrink: 0; }
+.role-card .role-info { flex: 1; }
+.role-card .role-name { font-weight: 800; font-size: 1rem; }
+.role-card .role-desc { font-size: 0.8rem; color: var(--muted); }
 
-  .intro label {
-    display: block;
-    text-align: left;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-light);
-    margin-bottom: 6px;
-  }
+/* ── GAME HUD ── */
+#game { justify-content: flex-start; gap: 0; padding: 0; }
+.hud {
+  width: 100%; background: var(--card);
+  padding: 0.75rem 1rem;
+  display: flex; align-items: center; gap: 0.75rem;
+  border-bottom: 2px solid var(--card2);
+  flex-shrink: 0;
+}
+.hud-place { font-size: 1.1rem; font-weight: 900; flex: 1; }
+.hud-score { font-size: 0.85rem; background: var(--card2); border-radius: 999px; padding: 0.3rem 0.8rem; font-weight: 700; }
+.hud-level { font-size: 0.85rem; color: var(--yellow); font-weight: 700; }
+.hud-stars { font-size: 1rem; letter-spacing: 0.1em; }
 
-  .intro input[type="text"] {
-    width: 100%;
-    font-family: 'Nunito', sans-serif;
-    font-size: 1.05rem;
-    padding: 10px 14px;
-    border: 2px solid var(--border);
-    border-radius: 10px;
-    outline: none;
-    transition: border-color 0.15s ease;
-    margin-bottom: 16px;
-  }
+/* timer bar */
+.timer-bar-wrap { width: 100%; height: 8px; background: var(--card2); flex-shrink: 0; }
+.timer-bar { height: 100%; background: var(--green); transition: width 0.1s linear, background 0.3s; border-radius: 0 4px 4px 0; }
 
-  .intro input[type="text"]:focus {
-    border-color: var(--green-soft);
-  }
+/* game area */
+.game-area { flex: 1; width: 100%; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; overflow-y: auto; }
 
-  .type-options {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 20px;
-  }
+/* scenario card */
+.scenario-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 1.2rem;
+  display: flex; align-items: flex-start; gap: 1rem;
+  border-left: 5px solid var(--yellow);
+  animation: slideIn 0.3s ease;
+}
+@keyframes slideIn { from { opacity:0; transform: translateY(-8px); } to { opacity:1; transform:none; } }
+.scenario-icon { font-size: 2.2rem; flex-shrink: 0; }
+.scenario-text { font-size: 1rem; font-weight: 700; line-height: 1.4; }
+.scenario-subtext { font-size: 0.85rem; color: var(--muted); margin-top: 0.3rem; }
 
-  .type-option {
-    flex: 1;
-    padding: 10px 6px;
-    border: 2px solid var(--border);
-    border-radius: 10px;
-    background: var(--bg);
-    cursor: pointer;
-    transition: all 0.15s ease;
-    text-align: center;
-  }
+/* choices */
+.choices { display: flex; flex-direction: column; gap: 0.6rem; }
+.choice-btn {
+  background: var(--card2);
+  border: 3px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 0.9rem 1.2rem;
+  color: var(--text);
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem; font-weight: 700;
+  cursor: pointer;
+  text-align: left;
+  display: flex; align-items: center; gap: 0.75rem;
+  transition: all 0.15s;
+  animation: slideIn 0.3s ease both;
+}
+.choice-btn:nth-child(1) { animation-delay: 0.05s; }
+.choice-btn:nth-child(2) { animation-delay: 0.1s; }
+.choice-btn:nth-child(3) { animation-delay: 0.15s; }
+.choice-btn:hover { border-color: var(--yellow); background: rgba(241,196,15,0.08); transform: translateX(3px); }
+.choice-btn .choice-icon { font-size: 1.4rem; flex-shrink: 0; }
+.choice-btn.correct { border-color: var(--green); background: rgba(46,204,113,0.15); pointer-events: none; }
+.choice-btn.wrong { border-color: var(--red); background: rgba(231,76,60,0.15); pointer-events: none; }
+.choice-btn.reveal { border-color: var(--green); opacity: 0.6; pointer-events: none; }
+.choice-btn:disabled { pointer-events: none; }
 
-  .type-option:hover {
-    border-color: var(--green-soft);
-    background: #eef4ea;
-  }
+/* click game */
+.click-area {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 1rem;
+  display: flex; flex-direction: column; gap: 0.75rem;
+}
+.click-title { font-weight: 800; font-size: 0.95rem; }
+.items-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 0.6rem; }
+.item-btn {
+  background: var(--card2);
+  border: 3px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 0.4rem;
+  cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+  transition: all 0.15s;
+  font-family: 'Nunito', sans-serif;
+}
+.item-btn .item-icon { font-size: 1.8rem; }
+.item-btn .item-label { font-size: 0.7rem; font-weight: 700; color: var(--muted); text-align: center; line-height: 1.2; }
+.item-btn:hover { border-color: var(--yellow); transform: scale(1.05); }
+.item-btn.selected { border-color: var(--blue); background: rgba(52,152,219,0.15); }
+.item-btn.correct { border-color: var(--green); background: rgba(46,204,113,0.2); animation: pop 0.3s ease; }
+.item-btn.wrong { border-color: var(--red); background: rgba(231,76,60,0.2); animation: shake 0.3s ease; }
+@keyframes pop { 0%{transform:scale(1)} 50%{transform:scale(1.15)} 100%{transform:scale(1)} }
+@keyframes shake { 0%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} 100%{transform:translateX(0)} }
 
-  .type-option.active {
-    border-color: var(--green-dark);
-    background: #e2eddb;
-  }
+/* order display */
+.order-display {
+  background: var(--card2);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  display: flex; align-items: center; gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.order-item { font-size: 1.4rem; }
+.order-label { font-size: 0.8rem; font-weight: 700; color: var(--muted); }
 
-  .type-option .type-label {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: var(--green-dark);
-  }
+/* feedback toast */
+.feedback-toast {
+  position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+  background: var(--green); color: white;
+  border-radius: 999px; padding: 0.6rem 1.5rem;
+  font-weight: 800; font-size: 1rem;
+  pointer-events: none; z-index: 100;
+  opacity: 0; transition: opacity 0.2s;
+  white-space: nowrap;
+}
+.feedback-toast.show { opacity: 1; }
+.feedback-toast.bad { background: var(--red); }
 
-  .type-option .type-icon {
-    font-size: 1.4rem;
-    margin-bottom: 2px;
-  }
+/* progress dots */
+.progress-dots { display: flex; gap: 0.4rem; justify-content: center; flex-wrap: wrap; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--card2); transition: background 0.2s; }
+.dot.done { background: var(--green); }
+.dot.current { background: var(--yellow); }
+.dot.fail { background: var(--red); }
 
-  .error-msg {
-    color: #c0392b;
-    font-size: 0.82rem;
-    margin-bottom: 10px;
-    display: none;
-  }
+/* result screen */
+#result { justify-content: center; gap: 1.2rem; text-align: center; padding: 2rem 1rem; }
+.result-emoji { font-size: 5rem; animation: pop 0.5s ease; }
+.result-title { font-size: 1.8rem; font-weight: 900; }
+.result-score { font-size: 1.1rem; color: var(--muted); }
+.result-stars { font-size: 2rem; letter-spacing: 0.2em; }
+.result-tip { background: var(--card); border-radius: var(--radius); padding: 1rem; font-size: 0.9rem; line-height: 1.5; color: var(--muted); max-width: 400px; }
+.btn-primary {
+  background: var(--yellow); color: #1a1a2e;
+  border: none; border-radius: 999px;
+  padding: 0.9rem 2.5rem;
+  font-family: 'Nunito', sans-serif; font-size: 1.1rem; font-weight: 900;
+  cursor: pointer; transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(241,196,15,0.4);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(241,196,15,0.5); }
 
-  /* ---- MAP SCREEN ---- */
-  .map-screen { display: none; width: 100%; max-width: 960px; }
+/* plant request bubble */
+.plant-bubble {
+  position: absolute; top: -28px; right: -8px;
+  background: var(--blue); color: white;
+  border-radius: 999px; padding: 2px 8px;
+  font-size: 0.65rem; font-weight: 800;
+  white-space: nowrap; pointer-events: none;
+  animation: bounce 1s ease infinite;
+}
+@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
+.item-btn { position: relative; }
 
-  .header {
-    text-align: center;
-    margin-bottom: 16px;
-  }
+.volgende-btn {
+  width: 100%;
+  background: var(--green);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  padding: 1rem;
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 0.5rem;
+  animation: slideIn 0.2s ease;
+}
+.volgende-btn:hover { background: var(--green-d); transform: translateY(-2px); }
 
-  .header h1 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--green-dark);
-    margin-bottom: 4px;
-  }
-
-  .header p {
-    font-size: 0.95rem;
-    color: var(--text-light);
-    max-width: 500px;
-    margin: 0 auto;
-    line-height: 1.5;
-  }
-
-  .map-container {
-    background: var(--card);
-    border-radius: 16px;
-    border: 1px solid var(--border);
-    box-shadow: 0 2px 12px var(--shadow);
-    padding: 16px;
-    width: 100%;
-    position: relative;
-  }
-
-  #map-svg {
-    width: 100%;
-    height: auto;
-    display: block;
-    cursor: crosshair;
-    background: var(--ocean);
-    border-radius: 10px;
-  }
-
-  #map-svg path.country {
-    fill: var(--land);
-    stroke: var(--land-stroke);
-    stroke-width: 0.8;
-    transition: fill 0.15s ease;
-    cursor: pointer;
-  }
-
-  #map-svg path.country:hover {
-    fill: var(--land-hover);
-    stroke: var(--green-dark);
-    stroke-width: 1.2;
-  }
-
-  #map-svg path.country.selected {
-    fill: var(--selected);
-    stroke: var(--selected-dark);
-    stroke-width: 1.2;
-  }
-
-  #map-svg path.country.selected:hover {
-    fill: var(--selected-hover);
-  }
-
-  .controls {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-top: 16px;
-  }
-
-  .btn {
-    font-family: 'Nunito', sans-serif;
-    font-size: 0.9rem;
-    font-weight: 600;
-    border: none;
-    border-radius: 10px;
-    padding: 10px 20px;
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-
-  .btn-primary {
-    background: var(--green-soft);
-    color: #fff;
-  }
-
-  .btn-primary:hover { background: var(--green-dark); }
-
-  .btn-secondary {
-    background: var(--card);
-    color: var(--text);
-    border: 1px solid var(--border);
-  }
-
-  .btn-secondary:hover { background: #eef4ea; }
-
-  .btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .info-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 12px;
-    padding: 10px 14px;
-    background: var(--bg);
-    border-radius: 10px;
-    font-size: 0.85rem;
-    color: var(--text-light);
-  }
-
-  .counter {
-    font-weight: 700;
-    color: var(--green-dark);
-    font-size: 1rem;
-  }
-
-  .legend {
-    display: flex;
-    gap: 16px;
-    justify-content: center;
-    margin-top: 10px;
-    font-size: 0.8rem;
-    color: var(--text-light);
-  }
-
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-
-  .legend-swatch {
-    width: 14px;
-    height: 14px;
-    border-radius: 4px;
-    border: 1px solid var(--border);
-  }
-
-  .selected-list {
-    margin-top: 16px;
-    width: 100%;
-  }
-
-  .selected-list h3 {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--green-dark);
-    margin-bottom: 8px;
-  }
-
-  .tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-
-  .tag {
-    background: var(--selected-light);
-    color: #8a5510;
-    font-size: 0.8rem;
-    font-weight: 600;
-    padding: 4px 10px;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-
-  .tag:hover {
-    background: var(--selected);
-    color: #fff;
-  }
-
-  .tooltip {
-    position: fixed;
-    background: var(--text);
-    color: #fff;
-    font-size: 0.8rem;
-    font-weight: 600;
-    padding: 5px 10px;
-    border-radius: 6px;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.1s ease;
-    z-index: 100;
-    white-space: nowrap;
-  }
-
-  .loading {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 300px;
-    color: var(--text-light);
-    font-size: 1rem;
-  }
-
-  .spinner {
-    width: 32px;
-    height: 32px;
-    border: 3px solid var(--border);
-    border-top-color: var(--green-soft);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin-bottom: 12px;
-  }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  #export-canvas { display: none; }
+@media (max-width: 400px) {
+  .place-grid { grid-template-columns: 1fr 1fr; }
+  .items-grid { grid-template-columns: repeat(3, 1fr); }
+}
 </style>
 </head>
 <body>
 
-<!-- ======= INTRO SCREEN ======= -->
-<div class="intro" id="intro-screen">
-  <h1>Wereldkaart</h1>
-  <p>Vul de naam van jouw dier, plant of bloem in. Daarna kun je op de kaart aanklikken in welke landen het voorkomt.</p>
+<!-- FEEDBACK TOAST -->
+<div class="feedback-toast" id="toast"></div>
 
-  <label for="species-name">Naam van jouw soort</label>
-  <input type="text" id="species-name" placeholder="Bijv. Bunzing, Varen, Lavendel..." autofocus>
-
-  <label>Wat voor soort is het?</label>
-  <div class="type-options">
-    <div class="type-option" data-type="dier" id="opt-dier">
-      <div class="type-icon">🦡</div>
-      <div class="type-label">Dier</div>
+<!-- HOME -->
+<div class="screen active" id="home">
+  <div class="logo">🎓</div>
+  <div class="home-title">Stage<span>Simulator</span></div>
+  <div class="home-sub">Kies waar jij stage gaat lopen</div>
+  <div class="place-grid" style="grid-template-columns:1fr 1fr 1fr;">
+    <div class="place-card intratuin" onclick="selectPlace('intratuin')">
+      <div class="icon">🌿</div>
+      <div class="name">Intratuin / Scalabor</div>
+      <div class="tagline">Horeca, winkel & magazijn</div>
     </div>
-    <div class="type-option" data-type="plant" id="opt-plant">
-      <div class="type-icon">🌿</div>
-      <div class="type-label">Plant</div>
+    <div class="place-card papendal" onclick="selectPlace('papendal')">
+      <div class="icon">🏟️</div>
+      <div class="name">Papendal</div>
+      <div class="tagline">Sportkantine & vergadering</div>
     </div>
-    <div class="type-option" data-type="bloem" id="opt-bloem">
-      <div class="type-icon">🌼</div>
-      <div class="type-label">Bloem</div>
+    <div class="place-card mcdonalds" onclick="selectPlace('mcdonalds')">
+      <div class="icon">🍔</div>
+      <div class="name">McDonald's</div>
+      <div class="tagline">Keuken & kassa</div>
     </div>
-  </div>
-
-  <div class="error-msg" id="error-msg">Vul een naam in en kies een soort.</div>
-
-  <button class="btn btn-primary" id="btn-start" style="width:100%; padding: 12px;">Ga naar de kaart</button>
-</div>
-
-<!-- ======= MAP SCREEN ======= -->
-<div class="map-screen" id="map-screen">
-  <div class="header">
-    <h1 id="map-title"></h1>
-    <p>Klik op de landen waar <span id="species-label"></span> voorkomt. Klik nogmaals om te deselecteren.</p>
-  </div>
-
-  <div class="map-container" id="map-container">
-    <div class="loading" id="loading">
-      <div class="spinner"></div>
-      Kaart laden...
-    </div>
-    <svg id="map-svg" viewBox="0 0 960 500" xmlns="http://www.w3.org/2000/svg" style="display:none;"></svg>
-    <div class="legend">
-      <div class="legend-item">
-        <div class="legend-swatch" style="background: var(--land);"></div>
-        Niet geselecteerd
-      </div>
-      <div class="legend-item">
-        <div class="legend-swatch" style="background: var(--selected);"></div>
-        Komt hier voor
-      </div>
-    </div>
-    <div class="info-bar">
-      <span>Geselecteerde landen: <span class="counter" id="counter">0</span></span>
-      <span id="hover-name" style="font-weight:600; color: var(--green-dark);"></span>
-    </div>
-  </div>
-
-  <div class="controls">
-    <button class="btn btn-primary" id="btn-export" disabled>Opslaan als afbeelding</button>
-    <button class="btn btn-secondary" id="btn-reset" disabled>Opnieuw beginnen</button>
-    <button class="btn btn-secondary" id="btn-back">Andere soort kiezen</button>
-  </div>
-
-  <div class="selected-list" id="selected-list" style="display:none;">
-    <h3>Geselecteerde landen:</h3>
-    <div class="tags" id="tags"></div>
   </div>
 </div>
 
-<div class="tooltip" id="tooltip"></div>
-<canvas id="export-canvas"></canvas>
+<!-- ROLE SELECT -->
+<div class="screen" id="roleselect">
+  <button class="back-btn" onclick="showScreen('home')">← Terug</button>
+  <div class="section-title" id="role-title">Kies jouw rol</div>
+  <div class="section-sub" id="role-sub">Wat ga jij doen vandaag?</div>
+  <div class="role-grid" id="role-grid"></div>
+</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<!-- GAME -->
+<div class="screen" id="game">
+  <div class="hud">
+    <div class="hud-place" id="hud-place">🌿 Intratuin</div>
+    <div class="hud-stars" id="hud-stars">⭐⭐⭐</div>
+    <div class="hud-level" id="hud-level">Lvl 1</div>
+    <div class="hud-score" id="hud-score">0 pts</div>
+  </div>
+  <div class="timer-bar-wrap"><div class="timer-bar" id="timer-bar"></div></div>
+  <div class="game-area" id="game-area"></div>
+</div>
+
+<!-- RESULT -->
+<div class="screen" id="result">
+  <div class="result-emoji" id="result-emoji">🎉</div>
+  <div class="result-title" id="result-title">Goed gedaan!</div>
+  <div class="result-stars" id="result-stars">⭐⭐⭐</div>
+  <div class="result-score" id="result-score">Je scoorde 0 punten</div>
+  <div class="result-tip" id="result-tip"></div>
+  <button class="btn-primary" onclick="playAgain()">Nog een keer 🔄</button>
+  <button class="back-btn" onclick="showScreen('home')" style="margin-top:0.5rem">← Andere plek kiezen</button>
+</div>
+
 <script>
-(function() {
-  let speciesName = '';
-  let speciesType = '';
-  let selected = new Set();
-  let mapReady = false;
-  let countries, projection, path;
+// ═══════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════
 
-  const introScreen = document.getElementById('intro-screen');
-  const mapScreen = document.getElementById('map-screen');
-  const nameInput = document.getElementById('species-name');
-  const errorMsg = document.getElementById('error-msg');
-  const btnStart = document.getElementById('btn-start');
-  const typeOptions = document.querySelectorAll('.type-option');
+const PLACES = {
+  intratuin: {
+    name: '🌿 Intratuin / Scalabor',
+    color: '#2ecc71',
+    roles: [
+      { id: 'horeca', icon: '☕', name: 'Horeca / Koffiebar', desc: 'Bestellingen opnemen en klaarmaken' },
+      { id: 'winkel', icon: '🛒', name: 'Winkel', desc: 'Klanten helpen, vakken vullen, planten verzorgen' },
+      { id: 'magazijn', icon: '📦', name: 'Magazijn', desc: 'Dozen uitpakken, opslaan en leveren' }
+    ]
+  },
+  papendal: {
+    name: '🏟️ Papendal',
+    color: '#3498db',
+    roles: [
+      { id: 'bediening', icon: '🍽️', name: 'Bediening', desc: 'Sporters bedienen in de kantine' },
+      { id: 'keuken', icon: '👨‍🍳', name: 'Keuken', desc: 'Eten klaarmaken en uitserveren' },
+      { id: 'vergadering', icon: '🪑', name: 'Vergaderzalen', desc: 'Zalen klaarzetten en opruimen' }
+    ]
+  },
+  mcdonalds: {
+    name: '🍔 McDonald\'s',
+    color: '#f1c40f',
+    roles: [
+      { id: 'kassa', icon: '🧾', name: 'Kassa', desc: 'Bestellingen opnemen en afrekenen' },
+      { id: 'keuken_mc', icon: '🍟', name: 'Keuken', desc: 'Burgers en friet klaarmaken' },
+      { id: 'schoon', icon: '🧹', name: 'Schoonmaak', desc: 'Restaurant schoon en netjes houden' }
+    ]
+  },
+};
 
-  typeOptions.forEach(opt => {
-    opt.addEventListener('click', () => {
-      typeOptions.forEach(o => o.classList.remove('active'));
-      opt.classList.add('active');
-      speciesType = opt.dataset.type;
-    });
-  });
+// ═══════════════════════════════════════════════
+// SCENARIO BUILDERS
+// ═══════════════════════════════════════════════
 
-  btnStart.addEventListener('click', startMap);
-  nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') startMap(); });
+function getScenarios(place, role, level) {
+  const hard = level >= 3;
+  const veryHard = level >= 5;
 
-  function startMap() {
-    const name = nameInput.value.trim();
-    if (!name || !speciesType) {
-      errorMsg.style.display = 'block';
-      return;
-    }
-    errorMsg.style.display = 'none';
-    speciesName = name;
+  const pools = {
 
-    const article = speciesType === 'dier' ? 'het' : 'de';
-    const label = `${article} ${speciesName}`;
+    // ── INTRATUIN HORECA / KOFFIEBAR ──
+    intratuin_horeca: [
+      { type:'choice', icon:'👩', text:'Een klant zegt: "Mag ik een cappuccino?"', sub:'Wat doe jij?',
+        choices:[
+          {icon:'✅', text:'Je noteert de bestelling en herhaalt hem', correct:true},
+          {icon:'📱', text:'Je kijkt op je telefoon', correct:false, feedback:'Dat begrijp ik — even snel kijken voelt normaal. Op de werkvloer is het fijn als je de klant even voorrang geeft. Daarna mag de telefoon weer.'},
+          {icon:'🚶', text:'Je loopt weg', correct:false, feedback:'Misschien wist je even niet wat je moest doen. Dat is oké! Blijf staan en zeg: "Momentje, ik kom eraan." Dan voelt de klant zich gezien.'}
+        ], tip:'Altijd de bestelling herhalen zodat je zeker weet wat iemand wil.' },
+      { type:'click', icon:'☕', text:'Maak de cappuccino!', sub:'Tik op wat je nodig hebt', order:['☕','🥛','🫖'],
+        items:[{i:'☕',l:'Espressokop'},{i:'🥛',l:'Melk'},{i:'🫖',l:'Melkopschuimer'},{i:'🍵',l:'Theezakje'},{i:'🧃',l:'Sap'},{i:'🍰',l:'Cake'}],
+        tip:'Voor een cappuccino heb je een espressokop, melk en een melkopschuimer nodig.' },
+      { type:'choice', icon:'😤', text:'Een klant klaagt: "Dit is te koud!"', sub:'Wat doe jij?',
+        choices:[
+          {icon:'😊', text:'Je zegt sorry en maakt een nieuwe', correct:true},
+          {icon:'🙄', text:'Je haalt je schouders op', correct:false, feedback:'Als je schouders ophaalt, bedoel je er waarschijnlijk niks mee. Maar de klant kan het verkeerd opvatten. Een klein "sorry" doet wonderen.'},
+          {icon:'😡', text:'Je zegt dat hij ongelijk heeft', correct:false, feedback:'Soms heb je misschien wél gelijk. Maar discussie met een klant maakt het moeilijker. Een nieuwe koffie aanbieden is sneller en fijner voor iedereen.'}
+        ], tip:'Klachten netjes oplossen is heel belangrijk in de horeca.' },
+      ...(hard ? [
+        { type:'click', icon:'📋', text:'Tafel 3 bestelt: koffie, thee en een stuk appeltaart', sub:'Tik op alle drie in de juiste volgorde',
+          order:['☕','🍵','🍰'],
+          items:[{i:'☕',l:'Koffie'},{i:'🍵',l:'Thee'},{i:'🍰',l:'Appeltaart'},{i:'🧃',l:'Sap'},{i:'🫧',l:'Schuim'},{i:'🍪',l:'Koek'},{i:'🥤',l:'Cola'}],
+          tip:'Bij meerdere bestellingen: rustig een voor een afwerken.' },
+        { type:'choice', icon:'🏃', text:'Het is druk! Er staan 4 klanten te wachten.', sub:'Wat is de beste aanpak?',
+          choices:[
+            {icon:'📝', text:'Je helpt ze op volgorde en vraagt even geduld', correct:true},
+            {icon:'😰', text:'Je raakt in paniek en maakt fouten', correct:false, feedback:'Druk kan echt overweldigend zijn. Haal even adem. Eén klant tegelijk, dan gaat het vanzelf beter.'},
+            {icon:'🚪', text:'Je roept om hulp van de baas', correct:false, feedback:'Hulp vragen mag altijd! Maar als je er zelf even mee door kunt, is op volgorde werken en even geduld vragen ook prima.'}
+          ], tip:'Rustig blijven en op volgorde werken is altijd het beste.' }
+      ] : []),
+      ...(veryHard ? [
+        { type:'click', icon:'💸', text:'Reken af! Koffie €2,50 + taart €3,00', sub:'Tik op het juiste bedrag',
+          order:['€5,50'],
+          items:[{i:'€4,50',l:'€4,50'},{i:'€5,50',l:'€5,50'},{i:'€6,00',l:'€6,00'},{i:'€5,00',l:'€5,00'}],
+          tip:'€2,50 + €3,00 = €5,50' }
+      ] : [])
+    ],
 
-    document.getElementById('map-title').textContent = `Waar leeft of groeit ${article} ${speciesName}?`;
-    document.getElementById('species-label').textContent = label;
+    // ── INTRATUIN WINKEL ──
+    intratuin_winkel: [
+      { type:'choice', icon:'🛒', text:'Een klant vraagt: "Waar staan de cactussen?"', sub:'Wat zeg jij?',
+        choices:[
+          {icon:'😊', text:'Je loopt mee en wijst het aan', correct:true},
+          {icon:'🤷', text:'Je zegt dat je het niet weet', correct:false, feedback:'Het is eerlijk dat je het zegt. Je kunt er ook bij zeggen: "Ik zoek het even voor je uit." Dan helpt het toch.'},
+          {icon:'📱', text:'Je wijst naar een bord zonder te kijken', correct:false, feedback:'Je wil de klant helpen, dat is goed! Maar even meelopen voelt voor de klant veel fijner dan wijzen.'}
+        ], tip:'Klanten meenemen naar het product is het beste.' },
+      { type:'click', icon:'📦', text:'Vul het rek! Welke planten horen hier?', sub:'Tik op de kamerplanten',
+        order:['🌵','🪴','🌿'],
+        items:[{i:'🌵',l:'Cactus'},{i:'🪴',l:'Potplant'},{i:'🌿',l:'Groene plant'},{i:'🌹',l:'Roos'},{i:'🍎',l:'Appel'},{i:'🐟',l:'Vis'}],
+        tip:'Kamerplanten zijn planten voor binnen.' },
+      { type:'choice', icon:'💰', text:'Een klant wil betalen. De kassa piept raar.', sub:'Wat doe jij?',
+        choices:[
+          {icon:'🙋', text:'Je vraagt een collega om hulp', correct:true},
+          {icon:'🔨', text:'Je slaat op de kassa', correct:false, feedback:'Frustrerend als iets niet werkt! Maar slaan maakt het helaas erger. Een collega roepen is sneller en veiliger.'},
+          {icon:'🏃', text:'Je loopt weg', correct:false, feedback:'Misschien weet je even niet wat je moet doen. Dat is oké! Zeg gewoon: "Ik haal even hulp." Dan weet de klant dat je er mee bezig bent.'}
+        ], tip:'Bij problemen altijd hulp vragen, nooit zelf proberen te repareren.' },
+      ...(hard ? [
+        { type:'click', icon:'🌱', text:'Sorteer de planten op de goede plek!', sub:'Tik eerst op de buitenplanten',
+          order:['🌹','🌻','🌷'],
+          items:[{i:'🌹',l:'Roos (buiten)'},{i:'🌻',l:'Zonnebloem'},{i:'🌷',l:'Tulp'},{i:'🪴',l:'Potplant'},{i:'🌵',l:'Cactus'},{i:'🌿',l:'Klimop'}],
+          tip:'Rozen, zonnebloemen en tulpen zijn buitenplanten.' },
+        { type:'click', icon:'💧', text:'Welke planten hebben water nodig?', sub:'Tik op de planten met het 💧 icoontje',
+          order:['🌵💧','🪴💧','🌿💧'],
+          items:[
+            {i:'🌵',l:'Cactus',need:'💧'},{i:'🪴',l:'Potplant',need:'💧'},{i:'🌿',l:'Groene plant',need:'💧'},
+            {i:'🌹',l:'Roos',need:null},{i:'🌻',l:'Zonnebloem',need:null},{i:'🌷',l:'Tulp',need:null}
+          ], tip:'Planten met 💧 hebben nu water nodig.' },
+        { type:'choice', icon:'🌡️', text:'Het is 35 graden. De planten buiten zien er slap uit.', sub:'Wat doe je eerst?',
+          choices:[
+            {icon:'💧', text:'Je geeft ze extra water en zet ze in de schaduw', correct:true},
+            {icon:'☀️', text:'Je zet ze nog meer in de zon', correct:false, feedback:'Logisch dat je denkt dat zon goed is voor planten. Maar bij extreme hitte hebben ze juist schaduw nodig.'},
+            {icon:'🤷', text:'Niks, morgen kijken', correct:false, feedback:'Het is moeilijk te zien of een plant écht hulp nodig heeft. Bij slap hangende bladeren bij hitte is water en schaduw het beste.'}
+          ], tip:'Bij hitte extra water geven en schaduw bieden.' }
+      ] : [])
+    ],
 
-    introScreen.style.display = 'none';
-    mapScreen.style.display = 'flex';
-    mapScreen.style.flexDirection = 'column';
-    mapScreen.style.alignItems = 'center';
+    // ── INTRATUIN MAGAZIJN ──
+    intratuin_magazijn: [
+      { type:'click', icon:'📦', text:'Er komt een levering binnen. Wat doe je eerst?', sub:'Tik op de juiste stappen',
+        order:['📋','📦','🏷️'],
+        items:[{i:'📋',l:'Bon checken'},{i:'📦',l:'Dozen uitpakken'},{i:'🏷️',l:'Labels plakken'},{i:'☕',l:'Koffie drinken'},{i:'📱',l:'Telefoon'},{i:'🚪',l:'Weglopen'}],
+        tip:'Eerst bon controleren, dan uitpakken, dan labelen.' },
+      { type:'choice', icon:'🏋️', text:'Een doos is heel zwaar. Hoe til je hem op?', sub:'',
+        choices:[
+          {icon:'🦵', text:'Door je knieën, rug recht houden', correct:true},
+          {icon:'🔙', text:'Met een gebogen rug', correct:false, feedback:'Veel mensen tillen zo, dus het voelt vertrouwd. Maar je rug kan er pijn van krijgen. Door je knieën zakken beschermt je rug.'},
+          {icon:'🏃', text:'Je vraagt iemand anders altijd', correct:false, feedback:'Hulp vragen is slim bij heel zware dozen! Maar lichte dozen kun je zelf tillen als je het goed doet: door je knieën zakken.'}
+        ], tip:'Altijd door je knieën tillen, anders beschadig je je rug.' },
+      { type:'click', icon:'🌱', text:'Zet de planten op de juiste plek in het magazijn!', sub:'Tik eerst op de grote planten',
+        order:['🌳','🌲','🌵'],
+        items:[{i:'🌳',l:'Grote boom'},{i:'🌲',l:'Grote struik'},{i:'🌵',l:'Grote cactus'},{i:'🌸',l:'Klein bloempje'},{i:'🌱',l:'Zaailing'},{i:'🍀',l:'Kleine plant'}],
+        tip:'Grote zware planten altijd onderaan of op de grond.' },
+      { type:'choice', icon:'❓', text:'Je weet niet waar een product moet staan. Wat doe je?', sub:'',
+        choices:[
+          {icon:'🙋', text:'Je vraagt het aan je begeleider', correct:true},
+          {icon:'🤷', text:'Je zet het ergens neer', correct:false, feedback:'Logisch als je het niet weet — dan zet je het maar even weg. Maar je begeleider weet precies waar het hoort. Even vragen is sneller!'},
+          {icon:'🗑️', text:'Je gooit het weg', correct:false, feedback:'Dat zou ik ook denken als ik er geen raad mee weet! Maar weggooien is zonde. Vraag het even, dan is het zo opgelost.'}
+        ], tip:'Bij twijfel altijd vragen. Beter één keer vragen dan één keer fout zetten.' },
+      ...(hard ? [
+        { type:'click', icon:'🚚', text:'Bestelling klaarizetten voor levering! Pak in:', sub:'Tik op: pot, zakje aarde, etiket',
+          order:['🪴','🌍','🏷️'],
+          items:[{i:'🪴',l:'Bloempot'},{i:'🌍',l:'Zakje aarde'},{i:'🏷️',l:'Etiket'},{i:'💧',l:'Water'},{i:'✂️',l:'Schaar'},{i:'📱',l:'Telefoon'}],
+          tip:'Levering klaar: pot + aarde + etiket.' },
+        { type:'choice', icon:'⚠️', text:'Je ziet een gebroken pot op de grond.', sub:'Wat doe je?',
+          choices:[
+            {icon:'🧹', text:'Je veegt het op en meldt het bij je begeleider', correct:true},
+            {icon:'🚶', text:'Je loopt erover heen', correct:false, feedback:'Misschien denk je: iemand anders doet het wel. Maar gebroken scherven zijn gevaarlijk. Even opvegen duurt maar een minuut.'},
+            {icon:'🙈', text:'Je doet alsof je het niet ziet', correct:false, feedback:'Dat gevoel ken ik — je weet niet zeker of het jouw taak is. Maar veiligheid voor iedereen is altijd jouw taak. Even melden is genoeg.'}
+          ], tip:'Gevaarlijke situaties altijd meteen oplossen en melden.' }
+      ] : [])
+    ],
 
-    if (!mapReady) loadMap();
-  }
+    // ── PAPENDAL BEDIENING ──
+    papendal_bediening: [
+      { type:'choice', icon:'🏋️', text:'Een sporter vraagt: "Hebben jullie ook eiwitshakes?"', sub:'',
+        choices:[
+          {icon:'✅', text:'Je kijkt op de kaart en geeft antwoord', correct:true},
+          {icon:'🤷', text:'Je zegt gewoon nee', correct:false, feedback:'Je weet het niet zeker, dus je zegt nee — begrijpelijk. Maar even checken op de kaart of bij de keuken kost maar een minuutje en de sporter is blij.'},
+          {icon:'📱', text:'Je Googlet het', correct:false, feedback:'Slim dat je het wil opzoeken! Maar de informatie staat op de kaart of bij je collega in de keuken. Dat is sneller dan googlen.'}
+        ], tip:'Altijd even op de kaart of in de keuken checken.' },
+      { type:'click', icon:'🍽️', text:'Bestelling: pasta, water en een appel', sub:'Tik op alle drie',
+        order:['🍝','💧','🍎'],
+        items:[{i:'🍝',l:'Pasta'},{i:'💧',l:'Water'},{i:'🍎',l:'Appel'},{i:'🍺',l:'Bier'},{i:'🍕',l:'Pizza'},{i:'🍰',l:'Taart'}],
+        tip:'Sporters eten vaak gezond: pasta, fruit en water.' },
+      { type:'choice', icon:'🧹', text:'Een tafel is leeg. Wat doe jij nu?', sub:'',
+        choices:[
+          {icon:'🧹', text:'Je ruimt de tafel af en maakt hem schoon', correct:true},
+          {icon:'📺', text:'Je gaat even tv kijken', correct:false, feedback:'Even bijkomen is menselijk! Maar een vieze tafel laten staan valt op. Snel afruimen en dan mag je even uitblazen.'},
+          {icon:'🪑', text:'Je laat het staan voor de volgende gast', correct:false, feedback:'Misschien denk je dat de volgende gast het toch vies maakt. Maar een schone tafel geeft een goede indruk.'}
+        ], tip:'Lege tafels altijd meteen afruimen en schoonmaken.' },
+      ...(hard ? [
+        { type:'click', icon:'🏃', text:'Drukke dag! Vier sporters bestellen tegelijk', sub:'Tik op de vier gezonde opties',
+          order:['🍝','🥗','🍎','💧'],
+          items:[{i:'🍝',l:'Pasta'},{i:'🥗',l:'Salade'},{i:'🍎',l:'Appel'},{i:'💧',l:'Water'},{i:'🍟',l:'Friet'},{i:'🍺',l:'Bier'},{i:'🍰',l:'Taart'},{i:'🥤',l:'Cola'}],
+          tip:'Sporters kiezen voor pasta, salade, fruit en water.' }
+      ] : [])
+    ],
 
-  document.getElementById('btn-back').addEventListener('click', () => {
-    mapScreen.style.display = 'none';
-    introScreen.style.display = 'block';
-    selected.clear();
-    d3.selectAll('path.country').classed('selected', false);
-    updateUI();
-  });
+    // ── PAPENDAL KEUKEN ──
+    papendal_keuken: [
+      { type:'click', icon:'👨‍🍳', text:'Maak een gezonde sportlunch!', sub:'Tik op de goede ingrediënten',
+        order:['🍝','🥗','🍳'],
+        items:[{i:'🍝',l:'Pasta'},{i:'🥗',l:'Salade'},{i:'🍳',l:'Ei'},{i:'🍟',l:'Friet'},{i:'🍔',l:'Burger'},{i:'🍰',l:'Taart'}],
+        tip:'Sporters eten gezond: koolhydraten, groenten en eiwitten.' },
+      { type:'choice', icon:'🔪', text:'Je snijdt groenten en snijdt jezelf bijna.', sub:'Wat doe je?',
+        choices:[
+          {icon:'✋', text:'Je stopt en vraagt hoe je veilig kunt snijden', correct:true},
+          {icon:'🚀', text:'Je gaat gewoon snel door', correct:false, feedback:'Je wil je werk afmaken, dat is goed! Maar even stoppen en vragen kost maar een minuut. Veiligheid is altijd nummer één.'},
+          {icon:'🩹', text:'Je blijft snijden en hoopt op het beste', correct:false, feedback:'Dat gevoel ken ik — gewoon doorgaan en hopen. Maar bij messen is even stoppen en checken echt de slimste keuze.'}
+        ], tip:'Veiligheid in de keuken is het allerbelangrijkste.' },
+      { type:'click', icon:'⏱️', text:'Pasta moet 10 minuten koken. Zet de timer!', sub:'Tik op het juiste getal',
+        order:['10'],
+        items:[{i:'5',l:'5 min'},{i:'10',l:'10 min'},{i:'15',l:'15 min'},{i:'20',l:'20 min'}],
+        tip:'Pasta kookt meestal 8-10 minuten.' },
+      ...(hard ? [
+        { type:'choice', icon:'🌡️', text:'Het eten is klaar maar te heet om te serveren.', sub:'Wat doe je?',
+          choices:[
+            {icon:'⏳', text:'Je wacht even en serveert daarna netjes', correct:true},
+            {icon:'💨', text:'Je blaast erop en serveert meteen', correct:false, feedback:'Snel willen zijn is goed! Maar blazen op eten is hygiënisch niet ideaal. Even wachten is beter voor de gast.'},
+            {icon:'❄️', text:'Je gooit er ijsblokjes in', correct:false, feedback:'Creatief gedacht! Maar ijsblokjes veranderen de smaak en textuur. Even laten afkoelen is de beste oplossing.'}
+          ], tip:'Even laten afkoelen zodat gasten zichzelf niet branden.' }
+      ] : [])
+    ],
 
-  const nlNames = {
-    'Afghanistan':'Afghanistan','Albania':'Albanië','Algeria':'Algerije','Angola':'Angola',
-    'Argentina':'Argentinië','Armenia':'Armenië','Australia':'Australië','Austria':'Oostenrijk',
-    'Azerbaijan':'Azerbeidzjan','Bangladesh':'Bangladesh','Belarus':'Belarus','Belgium':'België',
-    'Bolivia':'Bolivia','Bosnia and Herz.':'Bosnië-Herzegovina','Botswana':'Botswana',
-    'Brazil':'Brazilië','Bulgaria':'Bulgarije','Cambodia':'Cambodja','Cameroon':'Kameroen',
-    'Canada':'Canada','Central African Rep.':'Centraal-Afrikaanse Republiek','Chad':'Tsjaad',
-    'Chile':'Chili','China':'China','Colombia':'Colombia','Congo':'Congo',
-    'Costa Rica':'Costa Rica','Croatia':'Kroatië','Cuba':'Cuba','Cyprus':'Cyprus',
-    'Czechia':'Tsjechië','Dem. Rep. Congo':'Democratische Republiek Congo','Denmark':'Denemarken',
-    'Dominican Rep.':'Dominicaanse Republiek','Ecuador':'Ecuador','Egypt':'Egypte',
-    'El Salvador':'El Salvador','Eq. Guinea':'Equatoriaal-Guinea','Eritrea':'Eritrea',
-    'Estonia':'Estland','eSwatini':'Eswatini','Ethiopia':'Ethiopië','Finland':'Finland',
-    'France':'Frankrijk','Gabon':'Gabon','Gambia':'Gambia','Georgia':'Georgië',
-    'Germany':'Duitsland','Ghana':'Ghana','Greece':'Griekenland','Guatemala':'Guatemala',
-    'Guinea':'Guinee','Guinea-Bissau':'Guinee-Bissau','Guyana':'Guyana','Haiti':'Haïti',
-    'Honduras':'Honduras','Hungary':'Hongarije','Iceland':'IJsland','India':'India',
-    'Indonesia':'Indonesië','Iran':'Iran','Iraq':'Irak','Ireland':'Ierland',
-    'Israel':'Israël','Italy':'Italië','Ivory Coast':'Ivoorkust','Jamaica':'Jamaica',
-    'Japan':'Japan','Jordan':'Jordanië','Kazakhstan':'Kazachstan','Kenya':'Kenia',
-    'Kosovo':'Kosovo','Kuwait':'Koeweit','Kyrgyzstan':'Kirgizië','Laos':'Laos',
-    'Latvia':'Letland','Lebanon':'Libanon','Lesotho':'Lesotho','Liberia':'Liberia',
-    'Libya':'Libië','Lithuania':'Litouwen','Luxembourg':'Luxemburg','Madagascar':'Madagaskar',
-    'Malawi':'Malawi','Malaysia':'Maleisië','Mali':'Mali','Mauritania':'Mauritanië',
-    'Mexico':'Mexico','Moldova':'Moldavië','Mongolia':'Mongolië','Montenegro':'Montenegro',
-    'Morocco':'Marokko','Mozambique':'Mozambique','Myanmar':'Myanmar','Namibia':'Namibië',
-    'Nepal':'Nepal','Netherlands':'Nederland','New Zealand':'Nieuw-Zeeland','Nicaragua':'Nicaragua',
-    'Niger':'Niger','Nigeria':'Nigeria','North Korea':'Noord-Korea','North Macedonia':'Noord-Macedonië',
-    'Norway':'Noorwegen','Oman':'Oman','Pakistan':'Pakistan','Panama':'Panama',
-    'Papua New Guinea':'Papoea-Nieuw-Guinea','Paraguay':'Paraguay','Peru':'Peru',
-    'Philippines':'Filipijnen','Poland':'Polen','Portugal':'Portugal','Puerto Rico':'Puerto Rico',
-    'Qatar':'Qatar','Romania':'Roemenië','Russia':'Rusland','Rwanda':'Rwanda',
-    'Saudi Arabia':'Saoedi-Arabië','Senegal':'Senegal','Serbia':'Servië',
-    'Sierra Leone':'Sierra Leone','Slovakia':'Slowakije','Slovenia':'Slovenië',
-    'Solomon Is.':'Salomonseilanden','Somalia':'Somalië','South Africa':'Zuid-Afrika',
-    'South Korea':'Zuid-Korea','S. Sudan':'Zuid-Soedan','Spain':'Spanje','Sri Lanka':'Sri Lanka',
-    'Sudan':'Soedan','Suriname':'Suriname','Sweden':'Zweden','Switzerland':'Zwitserland',
-    'Syria':'Syrië','Taiwan':'Taiwan','Tajikistan':'Tadzjikistan','Tanzania':'Tanzania',
-    'Thailand':'Thailand','Timor-Leste':'Oost-Timor','Togo':'Togo','Trinidad and Tobago':'Trinidad en Tobago',
-    'Tunisia':'Tunesië','Turkey':'Turkije','Turkmenistan':'Turkmenistan','Uganda':'Oeganda',
-    'Ukraine':'Oekraïne','United Arab Emirates':'Ver. Arabische Emiraten','United Kingdom':'Verenigd Koninkrijk',
-    'United States of America':'Verenigde Staten','Uruguay':'Uruguay','Uzbekistan':'Oezbekistan',
-    'Venezuela':'Venezuela','Vietnam':'Vietnam','W. Sahara':'Westelijke Sahara',
-    'Yemen':'Jemen','Zambia':'Zambia','Zimbabwe':'Zimbabwe',
-    'Côte d\'Ivoire':'Ivoorkust','Dem. Rep. Korea':'Noord-Korea','Falkland Is.':'Falklandeilanden',
-    'Fr. S. Antarctic Lands':'Franse Zuidelijke Gebieden','Greenland':'Groenland',
-    'New Caledonia':'Nieuw-Caledonië','Palestine':'Palestina','Rep. of Korea':'Zuid-Korea',
-    'Somaliland':'Somaliland','Vanuatu':'Vanuatu','Antarctica':'Antarctica'
+    // ── PAPENDAL VERGADERING ──
+    papendal_vergadering: [
+      { type:'click', icon:'🪑', text:'Zet de vergaderzaal klaar!', sub:'Tik op wat er in een vergaderzaal hoort',
+        order:['🪑','📋','💧'],
+        items:[{i:'🪑',l:'Stoelen'},{i:'📋',l:'Notitieblok'},{i:'💧',l:'Water'},{i:'🛏️',l:'Bed'},{i:'🎮',l:'Game'},{i:'🍺',l:'Bier'}],
+        tip:'In een vergaderzaal: stoelen, notitieblokken en water.' },
+      { type:'choice', icon:'👔', text:'De vergadering begint over 5 minuten. Wat doe je eerst?', sub:'',
+        choices:[
+          {icon:'✅', text:'Je checkt of alles klaarstaat en of het scherm werkt', correct:true},
+          {icon:'☕', text:'Je gaat zelf koffie drinken', correct:false, feedback:'Even koffie pakken is verleidelijk! Maar als je daarna terugkomt en iets niet klopt, heb je geen tijd meer. Eerst checken, dan koffie.'},
+          {icon:'📱', text:'Je checkt je telefoon', correct:false, feedback:'Even snel kijken voelt normaal. Maar 5 minuten gaan snel. Eerst alles nalopen zodat de vergadering soepel start.'}
+        ], tip:'Altijd even alles nalopen voordat gasten binnenkomen.' },
+      { type:'click', icon:'☕', text:'De gasten willen koffie en thee. Zet ze klaar!', sub:'Tik op wat je nodig hebt',
+        order:['☕','🍵','🫙'],
+        items:[{i:'☕',l:'Koffie'},{i:'🍵',l:'Thee'},{i:'🫙',l:'Suiker'},{i:'🍺',l:'Bier'},{i:'🍕',l:'Pizza'},{i:'🎂',l:'Taart'}],
+        tip:'Koffie, thee en suiker zijn standaard bij een vergadering.' },
+      ...(hard ? [
+        { type:'choice', icon:'😬', text:'Een gast vraagt om een beamer maar die werkt niet.', sub:'Wat doe je?',
+          choices:[
+            {icon:'🙋', text:'Je meldt het direct bij je leidinggevende', correct:true},
+            {icon:'🔨', text:'Je probeert hem zelf te repareren', correct:false, feedback:'Initiatief tonen is mooi! Maar technische apparaten zijn ingewikkeld. Melden bij je leidinggevende is sneller en veiliger.'},
+            {icon:'🤷', text:'Je zegt niks en hoopt dat niemand het merkt', correct:false, feedback:'Het is spannend om een probleem te melden. Maar hoe eerder je het zegt, hoe eerder het opgelost wordt. Je doet er niemand een plezier mee door te wachten.'}
+          ], tip:'Problemen altijd direct melden zodat ze snel opgelost worden.' }
+      ] : [])
+    ],
+
+    // ── MC DONALDS KASSA ──
+    mcdonalds_kassa: [
+      { type:'choice', icon:'😊', text:'Een klant komt aan de kassa. Wat zeg je eerst?', sub:'',
+        choices:[
+          {icon:'😊', text:'"Goedemiddag! Wat mag het zijn?"', correct:true},
+          {icon:'🤐', text:'Niks, je wacht af', correct:false, feedback:'Misschien vind je het spannend om het eerste woord te zeggen. Dat snap ik. Maar een kleine begroeting maakt het meteen makkelijker voor jullie allebei.'},
+          {icon:'😴', text:'Je gaapt en kijkt de andere kant op', correct:false, feedback:'Soms ben je gewoon moe. Dat is menselijk! Maar een klein knikje of glimlach naar de klant helpt al enorm.'}
+        ], tip:'Altijd vriendelijk begroeten is de basis van goede service.' },
+      { type:'click', icon:'🍔', text:'Bestelling: BigMac, grote friet, cola', sub:'Tik op alle drie',
+        order:['🍔','🍟','🥤'],
+        items:[{i:'🍔',l:'BigMac'},{i:'🍟',l:'Grote friet'},{i:'🥤',l:'Cola'},{i:'🍎',l:'Appel'},{i:'🥗',l:'Salade'},{i:'☕',l:'Koffie'}],
+        tip:'Herhaal de bestelling altijd om fouten te voorkomen.' },
+      { type:'choice', icon:'💶', text:'De klant betaalt €10 voor een bestelling van €7,50.', sub:'Hoeveel wisselgeld geef je terug?',
+        choices:[
+          {icon:'💶', text:'€2,50', correct:true},
+          {icon:'💶', text:'€3,50', correct:false},
+          {icon:'💶', text:'€2,00', correct:false}
+        ], tip:'€10,00 - €7,50 = €2,50 wisselgeld.' },
+      ...(hard ? [
+        { type:'click', icon:'🎉', text:'Happy Meal bestelling! Kies burger, friet en speeltje', sub:'Tik op de drie onderdelen',
+          order:['🍔','🍟','🧸'],
+          items:[{i:'🍔',l:'Burger'},{i:'🍟',l:'Frietjes'},{i:'🧸',l:'Speeltje'},{i:'🥤',l:'Cola'},{i:'🍎',l:'Appel'},{i:'🍰',l:'Taart'},{i:'☕',l:'Koffie'}],
+          tip:'Happy Meal = burger + friet + speeltje.' }
+      ] : []),
+      ...(veryHard ? [
+        { type:'choice', icon:'⚠️', text:'Een klant zegt dat zijn bestelling fout is.', sub:'Wat doe je?',
+          choices:[
+            {icon:'🙏', text:'Je zegt sorry en maakt het snel goed', correct:true},
+            {icon:'💬', text:'Je zegt dat hij zelf een fout heeft gemaakt', correct:false, feedback:'Misschien klopt dat ook! Maar een discussie maakt het vervelend voor iedereen. Sorry zeggen en oplossen werkt altijd beter.'},
+            {icon:'🚶', text:'Je roept een collega en verdwijnt', correct:false, feedback:'Hulp halen mag! Maar blijf er zelf bij. Samen lossen jullie het sneller op en de klant voelt zich serieuzer genomen.'}
+          ], tip:'Fouten toegeven en snel oplossen = goede service.' }
+      ] : [])
+    ],
+
+    // ── MC DONALDS KEUKEN ──
+    mcdonalds_keuken_mc: [
+      { type:'click', icon:'🍔', text:'Maak een BigMac! In de juiste volgorde', sub:'Tik: brood → burger → sla → kaas → brood',
+        order:['🍞','🥩','🥬','🧀','🍞'],
+        items:[{i:'🍞',l:'Brood'},{i:'🥩',l:'Burger'},{i:'🥬',l:'Sla'},{i:'🧀',l:'Kaas'},{i:'🍅',l:'Tomaat'},{i:'🥚',l:'Ei'}],
+        tip:'BigMac volgorde: brood, burger, sla, kaas, brood.' },
+      { type:'choice', icon:'🌡️', text:'De frietjes zijn te oud (meer dan 7 minuten).', sub:'Wat doe je?',
+        choices:[
+          {icon:'🗑️', text:'Je gooit ze weg en maakt nieuwe', correct:true},
+          {icon:'😋', text:'Je geeft ze toch aan de klant', correct:false, feedback:'Je wil geen verspilling — dat is een goed gevoel. Maar oude friet is niet meer lekker en dat merkt de klant. Verse friet maakt iedereen blij.'},
+          {icon:'🔥', text:'Je gooit ze terug in de frituur', correct:false, feedback:'Logisch dat je ze wil redden! Helaas worden ze dan te droog en donker. Verse friet is de enige echte oplossing.'}
+        ], tip:'Oude friet is niet meer lekker. Altijd verse friet maken.' },
+      { type:'click', icon:'⏱️', text:'Friet moet 3 minuten frituren. Zet de timer!', sub:'Tik op het juiste getal',
+        order:['3'],
+        items:[{i:'1',l:'1 min'},{i:'2',l:'2 min'},{i:'3',l:'3 min'},{i:'5',l:'5 min'}],
+        tip:'Friet frituurt in 2,5 tot 3 minuten goudbruin.' },
+      ...(hard ? [
+        { type:'click', icon:'📦', text:'Drukke lunchpauze! Maak: 2 burgers, friet, McNuggets', sub:'Tik op alle vier producten',
+          order:['🍔','🍔','🍟','🍗'],
+          items:[{i:'🍔',l:'Burger 1'},{i:'🍔',l:'Burger 2'},{i:'🍟',l:'Friet'},{i:'🍗',l:'McNuggets'},{i:'🥗',l:'Salade'},{i:'🍰',l:'Taart'},{i:'☕',l:'Koffie'}],
+          tip:'Bij meerdere bestellingen: rustig en op volgorde werken.' }
+      ] : [])
+    ],
+
+    // ── MC DONALDS SCHOON ──
+    mcdonalds_schoon: [
+      { type:'click', icon:'🧹', text:'Wat heb je nodig om te schoonmaken?', sub:'Tik op de schoonmaakmiddelen',
+        order:['🧹','🧽','💧'],
+        items:[{i:'🧹',l:'Bezem'},{i:'🧽',l:'Spons'},{i:'💧',l:'Water'},{i:'🍔',l:'Burger'},{i:'🎮',l:'Game'},{i:'📱',l:'Telefoon'}],
+        tip:'Schoonmaken doe je met bezem, spons en water.' },
+      { type:'choice', icon:'⚠️', text:'Je ziet een grote plas op de vloer. Wat doe je?', sub:'',
+        choices:[
+          {icon:'⚠️', text:'Je zet een bordje neer en maakt het schoon', correct:true},
+          {icon:'🏃', text:'Je loopt er omheen', correct:false, feedback:'Je ziet het wel, maar weet misschien niet of het jouw taak is. Toch is een bordje neerzetten al genoeg om iemand te beschermen.'},
+          {icon:'📱', text:'Je maakt een foto voor Instagram', correct:false, feedback:'Ha, grappig idee! Maar iemand kan uitglijden. Eerst bordje neer en opruimen, daarna mag je de foto maken.'}
+        ], tip:'Natte vloer = gevaar! Altijd meteen aanpakken.' },
+      { type:'click', icon:'🚻', text:'Toilet schoonmaken. Wat gebruik je?', sub:'Tik op de juiste spullen',
+        order:['🧴','🧽','🧤'],
+        items:[{i:'🧴',l:'Schoonmaakmiddel'},{i:'🧽',l:'Spons'},{i:'🧤',l:'Handschoenen'},{i:'🍔',l:'Burger'},{i:'📱',l:'Telefoon'},{i:'🎵',l:'Muziek'}],
+        tip:'Toiletten schoonmaken: altijd handschoenen aan!' },
+      ...(hard ? [
+        { type:'choice', icon:'⏰', text:'Het is druk maar de tafels zijn vies. Wat doe je?', sub:'',
+          choices:[
+            {icon:'⚡', text:'Je maakt snel tafels schoon tussen bestellingen door', correct:true},
+            {icon:'😴', text:'Je wacht tot het rustiger is', correct:false, feedback:'Wachten lijkt slim als het druk is. Maar vieze tafels vallen op. Even snel tussendoor is altijd beter dan helemaal wachten.'},
+            {icon:'🚪', text:'Je vraagt of je naar huis mag', correct:false, feedback:'Als het té druk wordt, mag je dat zeker zeggen! Maar even doorzetten en de tafels schoonmaken is ook een optie.'}
+          ], tip:'Ook als het druk is, schoonmaken blijft belangrijk.' }
+      ] : [])
+    ]
   };
 
-  const idToName = {
-    '004':'Afghanistan','008':'Albania','012':'Algeria','024':'Angola','032':'Argentina',
-    '051':'Armenia','036':'Australia','040':'Austria','031':'Azerbaijan','050':'Bangladesh',
-    '112':'Belarus','056':'Belgium','068':'Bolivia','070':'Bosnia and Herz.','072':'Botswana',
-    '076':'Brazil','100':'Bulgaria','116':'Cambodia','120':'Cameroon','124':'Canada',
-    '140':'Central African Rep.','148':'Chad','152':'Chile','156':'China','170':'Colombia',
-    '178':'Congo','188':'Costa Rica','191':'Croatia','192':'Cuba','196':'Cyprus',
-    '203':'Czechia','180':'Dem. Rep. Congo','208':'Denmark','214':'Dominican Rep.',
-    '218':'Ecuador','818':'Egypt','222':'El Salvador','226':'Eq. Guinea','232':'Eritrea',
-    '233':'Estonia','748':'eSwatini','231':'Ethiopia','246':'Finland','250':'France',
-    '266':'Gabon','270':'Gambia','268':'Georgia','276':'Germany','288':'Ghana',
-    '300':'Greece','320':'Guatemala','324':'Guinea','624':'Guinea-Bissau','328':'Guyana',
-    '332':'Haiti','340':'Honduras','348':'Hungary','352':'Iceland','356':'India',
-    '360':'Indonesia','364':'Iran','368':'Iraq','372':'Ireland','376':'Israel',
-    '380':'Italy','388':'Jamaica','392':'Japan','400':'Jordan','398':'Kazakhstan',
-    '404':'Kenya','0':'Kosovo','414':'Kuwait','417':'Kyrgyzstan','418':'Laos',
-    '428':'Latvia','422':'Lebanon','426':'Lesotho','430':'Liberia','434':'Libya',
-    '440':'Lithuania','442':'Luxembourg','450':'Madagascar','454':'Malawi','458':'Malaysia',
-    '466':'Mali','478':'Mauritania','484':'Mexico','498':'Moldova','496':'Mongolia',
-    '499':'Montenegro','504':'Morocco','508':'Mozambique','104':'Myanmar','516':'Namibia',
-    '524':'Nepal','528':'Netherlands','554':'New Zealand','558':'Nicaragua','562':'Niger',
-    '566':'Nigeria','408':'North Korea','807':'North Macedonia','578':'Norway','512':'Oman',
-    '586':'Pakistan','591':'Panama','598':'Papua New Guinea','600':'Paraguay','604':'Peru',
-    '608':'Philippines','616':'Poland','620':'Portugal','630':'Puerto Rico','634':'Qatar',
-    '642':'Romania','643':'Russia','646':'Rwanda','682':'Saudi Arabia','686':'Senegal',
-    '688':'Serbia','694':'Sierra Leone','703':'Slovakia','705':'Slovenia','090':'Solomon Is.',
-    '706':'Somalia','710':'South Africa','410':'South Korea','728':'S. Sudan','724':'Spain',
-    '144':'Sri Lanka','729':'Sudan','740':'Suriname','752':'Sweden','756':'Switzerland',
-    '760':'Syria','158':'Taiwan','762':'Tajikistan','834':'Tanzania','764':'Thailand',
-    '626':'Timor-Leste','768':'Togo','780':'Trinidad and Tobago','788':'Tunisia',
-    '792':'Turkey','795':'Turkmenistan','800':'Uganda','804':'Ukraine',
-    '784':'United Arab Emirates','826':'United Kingdom','840':'United States of America',
-    '858':'Uruguay','860':'Uzbekistan','862':'Venezuela','704':'Vietnam',
-    '732':'W. Sahara','887':'Yemen','894':'Zambia','716':'Zimbabwe',
-    '304':'Greenland','540':'New Caledonia','238':'Falkland Is.','010':'Antarctica',
-    '260':'Fr. S. Antarctic Lands','548':'Vanuatu','275':'Palestine','-99':'Somaliland',
-    '384':'Côte d\'Ivoire'
-  };
+  const key = place + '_' + role;
+  const pool = pools[key] || pools['mcdonalds_kassa'];
 
-  function getName(props) {
-    return nlNames[props.name] || props.name || 'Onbekend';
+  // Sessiebrede rotatie: bijhoud welke indices al gebruikt zijn
+  const trackKey = 'used_' + key;
+  if (!state.usedIndices) state.usedIndices = {};
+  if (!state.usedIndices[trackKey]) state.usedIndices[trackKey] = [];
+
+  const used = state.usedIndices[trackKey];
+
+  // Splits pool in ongebruikt en gebruikt
+  const unused = pool.map((_, i) => i).filter(i => !used.includes(i));
+
+  // Als ongebruikt leeg of te klein: reset en begin opnieuw
+  const count = Math.min(3 + level, pool.length);
+  if (unused.length < count) {
+    state.usedIndices[trackKey] = [];
+    unused.push(...pool.map((_, i) => i));
   }
 
-  const svg = d3.select('#map-svg');
-  const width = 960, height = 500;
-  const tooltip = document.getElementById('tooltip');
-  const counter = document.getElementById('counter');
-  const hoverName = document.getElementById('hover-name');
-  const btnExport = document.getElementById('btn-export');
-  const btnReset = document.getElementById('btn-reset');
-  const selectedList = document.getElementById('selected-list');
-  const tagsEl = document.getElementById('tags');
-
-  async function loadMap() {
-    let world;
-    try {
-      const r = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
-      world = await r.json();
-    } catch(e) {
-      try {
-        const r2 = await fetch('https://unpkg.com/world-atlas@2.0.2/countries-110m.json');
-        world = await r2.json();
-      } catch(e2) {
-        document.getElementById('loading').innerHTML = '<p>Kaart kon niet geladen worden.</p>';
-        return;
-      }
-    }
-
-    countries = topojson.feature(world, world.objects.countries);
-    countries.features.forEach(f => {
-      f.properties.name = idToName[String(f.id)] || f.properties.name || 'Onbekend';
-    });
-
-    projection = d3.geoNaturalEarth1().fitSize([width, height], countries);
-    path = d3.geoPath().projection(projection);
-
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('map-svg').style.display = 'block';
-
-    svg.selectAll('path.country')
-      .data(countries.features)
-      .enter()
-      .append('path')
-      .attr('class', 'country')
-      .attr('d', path)
-      .on('click', function(event, d) {
-        const name = getName(d.properties);
-        if (name === 'Onbekend' || name === 'Antarctica') return;
-        if (selected.has(name)) {
-          selected.delete(name);
-          d3.select(this).classed('selected', false);
-        } else {
-          selected.add(name);
-          d3.select(this).classed('selected', true);
-        }
-        updateUI();
-      })
-      .on('mouseenter', function(event, d) {
-        const name = getName(d.properties);
-        if (name === 'Antarctica') return;
-        hoverName.textContent = name;
-        tooltip.textContent = name;
-        tooltip.style.opacity = '1';
-      })
-      .on('mousemove', function(event) {
-        tooltip.style.left = (event.clientX + 12) + 'px';
-        tooltip.style.top = (event.clientY - 30) + 'px';
-      })
-      .on('mouseleave', function() {
-        hoverName.textContent = '';
-        tooltip.style.opacity = '0';
-      });
-
-    mapReady = true;
+  // Shuffle de ongebruikte indices
+  for (let i = unused.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [unused[i], unused[j]] = [unused[j], unused[i]];
   }
 
-  function updateUI() {
-    const count = selected.size;
-    counter.textContent = count;
-    btnExport.disabled = count === 0;
-    btnReset.disabled = count === 0;
+  const picked = unused.slice(0, count);
+  // Markeer als gebruikt voor deze sessie
+  state.usedIndices[trackKey].push(...picked);
 
-    if (count > 0) {
-      selectedList.style.display = 'block';
-      const sorted = [...selected].sort((a,b) => a.localeCompare(b, 'nl'));
-      tagsEl.innerHTML = sorted.map(n =>
-        `<span class="tag" data-name="${n}">${n} ×</span>`
-      ).join('');
-      tagsEl.querySelectorAll('.tag').forEach(tag => {
-        tag.addEventListener('click', () => {
-          const name = tag.dataset.name;
-          selected.delete(name);
-          svg.selectAll('path.country')
-            .filter(d => getName(d.properties) === name)
-            .classed('selected', false);
-          updateUI();
-        });
-      });
+  return picked.map(i => pool[i]);
+}
+
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let state = {
+  place: '', role: '',
+  scenarios: [], current: 0,
+  score: 0, correct: 0, wrong: 0,
+  level: 1, streak: 0,
+  timerInterval: null, timeLeft: 0, timeMax: 0,
+  dots: [],
+  usedIndices: {}
+};
+
+// ═══════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function selectPlace(place) {
+  state.place = place;
+  const pd = PLACES[place];
+  document.getElementById('role-title').textContent = pd.name + ' — kies jouw rol';
+  document.getElementById('role-sub').textContent = 'Welke taak ga jij doen?';
+  const grid = document.getElementById('role-grid');
+  grid.innerHTML = '';
+  pd.roles.forEach(r => {
+    const card = document.createElement('div');
+    card.className = 'role-card';
+    card.style.borderColor = pd.color;
+    card.innerHTML = `<div class="role-icon">${r.icon}</div>
+      <div class="role-info">
+        <div class="role-name">${r.name}</div>
+        <div class="role-desc">${r.desc}</div>
+      </div>
+      <div style="font-size:1.5rem">→</div>`;
+    card.onclick = () => startGame(place, r.id);
+    grid.appendChild(card);
+  });
+  showScreen('roleselect');
+}
+
+function startGame(place, role) {
+  const sameRole = state.place === place && state.role === role;
+  state.place = place; state.role = role;
+  state.score = 0; state.correct = 0; state.wrong = 0; state.streak = 0;
+  if (!sameRole) state.usedIndices = {};
+  if (state.level < 1) state.level = 1;
+  if (sameRole && state.level > 1) {
+    showToast('🔥 Je start op level ' + state.level + '!', false);
+  }
+  state.scenarios = getScenarios(place, role, state.level);
+  state.current = 0;
+  state.dots = state.scenarios.map(() => 'pending');
+
+  const pd = PLACES[place];
+  const roleData = pd.roles.find(r => r.id === role);
+  document.getElementById('hud-place').textContent = pd.name + ' — ' + (roleData ? roleData.name : '');
+  updateHUD();
+  showScreen('game');
+  renderScenario();
+}
+
+function updateHUD() {
+  document.getElementById('hud-score').textContent = state.score + ' pts';
+  document.getElementById('hud-level').textContent = 'Lvl ' + state.level;
+  const stars = state.correct >= 5 ? '⭐⭐⭐' : state.correct >= 3 ? '⭐⭐' : '⭐';
+  document.getElementById('hud-stars').textContent = stars;
+}
+
+// ═══════════════════════════════════════════════
+// TIMER
+// ═══════════════════════════════════════════════
+function startTimer(seconds) {
+  clearInterval(state.timerInterval);
+  state.timeMax = seconds;
+  state.timeLeft = seconds;
+  updateTimerBar();
+  state.timerInterval = setInterval(() => {
+    state.timeLeft -= 0.1;
+    if (state.timeLeft <= 0) {
+      state.timeLeft = 0;
+      updateTimerBar();
+      clearInterval(state.timerInterval);
+      onTimeOut();
     } else {
-      selectedList.style.display = 'none';
+      updateTimerBar();
     }
+  }, 100);
+}
+
+function updateTimerBar() {
+  const pct = (state.timeLeft / state.timeMax) * 100;
+  const bar = document.getElementById('timer-bar');
+  bar.style.width = pct + '%';
+  bar.style.background = pct > 50 ? 'var(--green)' : pct > 25 ? 'var(--yellow)' : 'var(--red)';
+}
+
+function onTimeOut() {
+  showToast('⏱️ Te langzaam!', true);
+  state.wrong++;
+  state.streak = 0;
+  if (state.dots[state.current] === 'pending') state.dots[state.current] = 'fail';
+  updateDots();
+  setTimeout(() => nextScenario(), 1200);
+}
+
+// ═══════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════
+function renderScenario() {
+  if (state.current >= state.scenarios.length) { endGame(); return; }
+  const sc = state.scenarios[state.current];
+  const area = document.getElementById('game-area');
+  area.innerHTML = '';
+
+  // dots
+  const dotsDiv = document.createElement('div');
+  dotsDiv.className = 'progress-dots';
+  dotsDiv.id = 'dots';
+  state.scenarios.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i < state.current ? (state.dots[i] === 'fail' ? ' fail' : ' done') : i === state.current ? ' current' : '');
+    dotsDiv.appendChild(d);
+  });
+  area.appendChild(dotsDiv);
+
+  // scenario card
+  const card = document.createElement('div');
+  card.className = 'scenario-card';
+  card.innerHTML = `<div class="scenario-icon">${sc.icon}</div>
+    <div><div class="scenario-text">${sc.text}</div>
+    ${sc.sub ? `<div class="scenario-subtext">${sc.sub}</div>` : ''}</div>`;
+  area.appendChild(card);
+
+  if (sc.type === 'choice') renderChoice(sc, area);
+  else if (sc.type === 'click') renderClick(sc, area);
+
+  // timer — adaptive
+  const baseTime = 20 - (state.level * 2);
+  const t = Math.max(8, baseTime);
+  startTimer(t);
+}
+
+function updateDots() {
+  const dotsDiv = document.getElementById('dots');
+  if (!dotsDiv) return;
+  const dots = dotsDiv.querySelectorAll('.dot');
+  dots.forEach((d, i) => {
+    d.className = 'dot' + (i < state.current ? (state.dots[i] === 'fail' ? ' fail' : ' done') : i === state.current ? ' current' : '');
+  });
+}
+
+// ── CHOICE ──
+function renderChoice(sc, area) {
+  const div = document.createElement('div');
+  div.className = 'choices';
+  sc.choices.forEach((c, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.style.animationDelay = (idx * 0.05) + 's';
+    btn.innerHTML = `<span class="choice-icon">${c.icon}</span>${c.text}`;
+    btn.onclick = () => onChoice(c, btn, div, sc);
+    div.appendChild(btn);
+  });
+  area.appendChild(div);
+}
+
+function onChoice(c, btn, container, sc) {
+  clearInterval(state.timerInterval);
+  const btns = container.querySelectorAll('.choice-btn');
+  btns.forEach(b => b.disabled = true);
+
+  if (c.correct) {
+    btn.classList.add('correct');
+    const pts = 10 + (state.streak * 2) + state.level * 2;
+    state.score += pts;
+    state.correct++;
+    state.streak++;
+    state.dots[state.current] = 'ok';
+    showToast('⭐ Super! +' + pts, false);
+    if (state.streak >= 2) checkLevelUp();
+    updateHUD(); updateDots();
+    if (sc.tip) showTip('💡 ' + sc.tip);
+  } else {
+    btn.style.borderColor = 'var(--orange)';
+    btn.style.background = 'rgba(230,126,34,0.12)';
+    state.streak = 0;
+    state.dots[state.current] = 'ok';
+    updateHUD(); updateDots();
+    const feedbackText = c.feedback || 'Dat snap ik. Toch werkt een andere aanpak hier beter.';
+    showTip('🤔 ' + feedbackText + (sc.tip ? '<br><br>💡 ' + sc.tip : ''));
+    showToast('💬 Goede poging!', false);
+  }
+  showVolgendeKnop();
+}
+
+// ── CLICK ──
+const PERSONS = [
+  { name: 'Yusuf', avatar: '👨🏽‍💼', color: '#2980b9' },
+  { name: 'Sara',  avatar: '👩🏻‍💼', color: '#8e44ad' },
+  { name: 'Daan',  avatar: '👦🏼',   color: '#27ae60' },
+  { name: 'Fatima',avatar: '👩🏾‍🦱', color: '#c0392b' },
+  { name: 'Lars',  avatar: '👨🏻‍🦰', color: '#d35400' },
+  { name: 'Noa',   avatar: '👧🏽',   color: '#16a085' },
+  { name: 'Kevin', avatar: '🧑🏿‍💼', color: '#2c3e50' },
+  { name: 'Lena',  avatar: '👩🏼‍🦳', color: '#7d3c98' },
+];
+
+function renderClick(sc, area) {
+  const isNeedGame = sc.items.some(it => it.need !== undefined);
+  let remaining;
+
+  if (isNeedGame) {
+    remaining = sc.items.filter(it => it.need).map(it => it.i);
+  } else {
+    remaining = [...sc.order];
   }
 
-  btnReset.addEventListener('click', () => {
-    selected.clear();
-    svg.selectAll('path.country').classed('selected', false);
-    updateUI();
-  });
+  // Kies een willekeurige persoon
+  const person = PERSONS[Math.floor(Math.random() * PERSONS.length)];
 
-  btnExport.addEventListener('click', async () => {
-    btnExport.textContent = 'Bezig met opslaan...';
-    btnExport.disabled = true;
+  // Persoon-bubble
+  const personDiv = document.createElement('div');
+  personDiv.style.cssText = `display:flex;align-items:center;gap:0.75rem;
+    background:var(--card2);border-radius:var(--radius);padding:0.9rem 1rem;
+    border-left:4px solid ${person.color};margin-bottom:0.5rem;`;
 
-    try {
-      const svgEl = document.getElementById('map-svg');
-      const serializer = new XMLSerializer();
-      let svgString = serializer.serializeToString(svgEl);
+  const avatarEl = document.createElement('div');
+  avatarEl.style.cssText = `font-size:2.2rem;flex-shrink:0;`;
+  avatarEl.textContent = person.avatar;
 
-      const styles = `<style>
-        path.country { fill: #b0c9a5; stroke: #fff; stroke-width: 0.8; }
-        path.country.selected { fill: #e8922e; stroke: #b56a14; stroke-width: 1.2; }
-      </style>`;
-      svgString = svgString.replace('</svg>', styles + '</svg>');
+  const speechDiv = document.createElement('div');
+  const nameEl = document.createElement('div');
+  nameEl.style.cssText = `font-size:0.75rem;font-weight:800;color:${person.color};margin-bottom:0.2rem;`;
+  nameEl.textContent = person.name;
 
-      const canvas = document.getElementById('export-canvas');
-      const scale = 2;
-      canvas.width = width * scale;
-      canvas.height = (height + 100) * scale;
-      const ctx = canvas.getContext('2d');
-      ctx.scale(scale, scale);
+  const msgEl = document.createElement('div');
+  msgEl.style.cssText = `font-size:0.95rem;font-weight:700;color:var(--text);line-height:1.3;`;
 
-      ctx.fillStyle = '#f7f9f4';
-      ctx.fillRect(0, 0, width, height + 100);
+  // Bericht afhankelijk van type
+  if (isNeedGame) {
+    msgEl.textContent = sc.text;
+  } else {
+    const orderEmojis = sc.order.join(' ');
+    const requests = [
+      `"Kun jij ${orderEmojis} voor me pakken?"`,
+      `"Ik heb ${orderEmojis} nodig, kun jij dat regelen?"`,
+      `"Mag ik ${orderEmojis} van je?"`,
+      `"Zou jij ${orderEmojis} kunnen klaarzetten?"`,
+    ];
+    msgEl.textContent = requests[Math.floor(Math.random() * requests.length)];
+  }
 
-      ctx.fillStyle = '#dceaf5';
-      ctx.beginPath();
-      ctx.roundRect(0, 44, width, height + 4, 10);
-      ctx.fill();
+  speechDiv.appendChild(nameEl);
+  speechDiv.appendChild(msgEl);
+  personDiv.appendChild(avatarEl);
+  personDiv.appendChild(speechDiv);
+  area.appendChild(personDiv);
 
-      const article = speciesType === 'dier' ? 'het' : 'de';
-      const title = `Waar leeft of groeit ${article} ${speciesName}?`;
-      ctx.fillStyle = '#3d6b35';
-      ctx.font = 'bold 22px Nunito, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(title, width / 2, 32);
+  // Items shufflen zodat de juiste antwoorden niet altijd bovenaan staan
+  const shuffledItems = [...sc.items].sort(() => Math.random() - 0.5);
 
-      const img = new Image();
-      const blob = new Blob([svgString], {type: 'image/svg+xml;charset=utf-8'});
-      const url = URL.createObjectURL(blob);
+  const clickArea = document.createElement('div');
+  clickArea.className = 'click-area';
+  const title = document.createElement('div');
+  title.className = 'click-title';
+  title.textContent = isNeedGame ? 'Tik op de planten die hulp nodig hebben!' : 'Tik op de juiste items:';
+  clickArea.appendChild(title);
 
-      await new Promise((resolve, reject) => {
-        img.onload = () => {
-          ctx.drawImage(img, 0, 46, width, height);
-          URL.revokeObjectURL(url);
+  const grid = document.createElement('div');
+  grid.className = 'items-grid';
 
-          const startY = height + 62;
-          const sorted = [...selected].sort((a,b) => a.localeCompare(b, 'nl'));
+  let clickedWrong = false;
 
-          ctx.fillStyle = '#3d6b35';
-          ctx.font = 'bold 13px Nunito, sans-serif';
-          ctx.textAlign = 'left';
-          ctx.fillText(`${selected.size} landen geselecteerd:`, 20, startY);
+  shuffledItems.forEach(item => {
+    const btn = document.createElement('button');
+    btn.className = 'item-btn';
+    btn.innerHTML = `<span class="item-icon">${item.i}</span><span class="item-label">${item.l}</span>`;
 
-          ctx.fillStyle = '#5a6b57';
-          ctx.font = '11px Nunito, sans-serif';
-          const countryText = sorted.join(', ');
-          const maxW = width - 60;
-          const words = countryText.split(', ');
-          let lines = [], line = '';
-          words.forEach(w => {
-            const test = line ? line + ', ' + w : w;
-            if (ctx.measureText(test).width > maxW && line) {
-              lines.push(line);
-              line = w;
-            } else { line = test; }
-          });
-          if (line) lines.push(line);
-          lines.forEach((l, i) => ctx.fillText(l, 20, startY + 16 + (i * 14)));
-
-          resolve();
-        };
-        img.onerror = reject;
-        img.src = url;
-      });
-
-      const link = document.createElement('a');
-      const safeName = speciesName.toLowerCase().replace(/[^a-z0-9]/g, '-');
-      link.download = `wereldkaart-${safeName}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-    } catch(err) {
-      console.error('Export fout:', err);
-      alert('Er ging iets mis bij het opslaan. Probeer het opnieuw.');
+    if (isNeedGame && item.need) {
+      const bubble = document.createElement('div');
+      bubble.className = 'plant-bubble';
+      bubble.textContent = item.need;
+      btn.appendChild(bubble);
     }
 
-    btnExport.textContent = 'Opslaan als afbeelding';
-    btnExport.disabled = selected.size === 0;
+    btn.onclick = () => {
+      if (btn.classList.contains('correct')) return;
+      clearInterval(state.timerInterval);
+
+      const isNeeded = isNeedGame ? !!item.need : remaining.includes(item.i);
+
+      if (isNeeded) {
+        btn.classList.add('correct');
+        remaining.splice(remaining.indexOf(item.i), 1);
+
+        if (remaining.length === 0) {
+          const pts = 15 + state.level * 3 + (clickedWrong ? 0 : 5);
+          state.score += pts;
+          state.correct++;
+          state.streak++;
+          state.dots[state.current] = 'ok';
+          showToast('⭐ Compleet! +' + pts, false);
+          if (state.streak >= 2) checkLevelUp();
+          updateHUD(); updateDots();
+          if (sc.tip) showTip('💡 ' + sc.tip);
+          showVolgendeKnop();
+        }
+      } else {
+        btn.style.borderColor = 'var(--orange)';
+        btn.style.background = 'rgba(230,126,34,0.12)';
+        clickedWrong = true;
+        state.streak = 0;
+        showToast('💬 Probeer een ander!', false);
+        updateHUD();
+        setTimeout(() => {
+          btn.style.borderColor = '';
+          btn.style.background = '';
+        }, 900);
+      }
+    };
+    grid.appendChild(btn);
   });
-})();
+
+  clickArea.appendChild(grid);
+  area.appendChild(clickArea);
+}
+
+// ═══════════════════════════════════════════════
+// LEVEL UP
+// ═══════════════════════════════════════════════
+function checkLevelUp() {
+  if (state.streak >= 3 && state.level < 6) {
+    state.level++;
+    state.streak = 0;
+    showToast('🔥 Level ' + state.level + '! Sneller nu!', false);
+    // inject a harder scenario
+    const harder = getScenarios(state.place, state.role, state.level);
+    const newSc = harder[Math.floor(Math.random() * harder.length)];
+    if (newSc && state.current < state.scenarios.length - 1) {
+      state.scenarios.splice(state.current + 1, 0, newSc);
+      state.dots.splice(state.current + 1, 0, 'pending');
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════
+// NEXT / END
+// ═══════════════════════════════════════════════
+function showVolgendeKnop() {
+  const area = document.getElementById('game-area');
+  if (area.querySelector('.volgende-btn')) return;
+  const btn = document.createElement('button');
+  btn.className = 'volgende-btn';
+  btn.innerHTML = 'Volgende →';
+  btn.onclick = () => nextScenario();
+  area.appendChild(btn);
+  btn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function nextScenario() {
+  state.current++;
+  renderScenario();
+}
+
+function showTip(tip) {
+  const area = document.getElementById('game-area');
+  const existing = area.querySelector('.tip-box');
+  if (existing) existing.remove();
+  const box = document.createElement('div');
+  box.className = 'tip-box';
+  box.style.cssText = 'background:rgba(241,196,15,0.1);border:2px solid var(--yellow);border-radius:12px;padding:0.7rem 1rem;font-size:0.85rem;color:var(--yellow);';
+  box.innerHTML = '💡 ' + tip;
+  area.appendChild(box);
+}
+
+function endGame() {
+  clearInterval(state.timerInterval);
+  const total = state.correct + state.wrong;
+  const pct = total > 0 ? Math.round((state.correct / total) * 100) : 0;
+  const stars = pct >= 80 ? '⭐⭐⭐' : pct >= 50 ? '⭐⭐' : '⭐';
+  const emoji = pct >= 80 ? '🏆' : pct >= 50 ? '😊' : '💪';
+  const titles = pct >= 80 ? 'Geweldig gedaan!' : pct >= 50 ? 'Goed bezig!' : 'Blijf oefenen!';
+  const tips = {
+    intratuin: 'Bij Intratuin/Scalabor draait alles om planten, klanten en samenwerken. Of je nu in de horeca, winkel of het magazijn werkt: vriendelijkheid en zorgvuldigheid zijn key.',
+    papendal: 'Bij Papendal is het belangrijk om snel en netjes te werken voor de sporters.',
+    mcdonalds: "Bij McDonald's telt elke seconde. Vriendelijk, snel en nauwkeurig."
+  };
+
+  document.getElementById('result-emoji').textContent = emoji;
+  document.getElementById('result-title').textContent = titles;
+  document.getElementById('result-stars').textContent = stars;
+  document.getElementById('result-score').textContent = `Je scoorde ${state.score} punten · ${pct}% goed · Level ${state.level}`;
+  document.getElementById('result-tip').textContent = tips[state.place] || '';
+  showScreen('result');
+}
+
+function playAgain() {
+  startGame(state.place, state.role);
+}
+
+// ═══════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════
+let toastTimer;
+function showToast(msg, bad) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'feedback-toast show' + (bad ? ' bad' : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1200);
+}
 </script>
 </body>
 </html>
