@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>StageSimulator</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
@@ -258,7 +258,8 @@ body {
 }
 .volgende-btn:hover { background: var(--green-d); transform: translateY(-2px); }
 
-@media (max-width: 400px) {
+@keyframes shake { 0%,100%{transform:translateX(0) rotate(0)} 25%{transform:translateX(-4px) rotate(-8deg)} 75%{transform:translateX(4px) rotate(8deg)} }
+@media(max-width:400px){
   .place-grid { grid-template-columns: 1fr 1fr; }
   .items-grid { grid-template-columns: repeat(3, 1fr); }
 }
@@ -724,7 +725,7 @@ function startGame(place, role) {
   const sameRole = state.place === place && state.role === role;
   state.place = place; state.role = role;
   state.score = 0; state.correct = 0; state.wrong = 0; state.streak = 0;
-  if (!sameRole) state.usedIndices = {};
+  if (!sameRole) { state.usedIndices = {}; state.usedInvasies = []; }
   if (state.level < 1) state.level = 1;
   if (sameRole && state.level > 1) {
     showToast('🔥 Je start op level ' + state.level + '!', false);
@@ -938,8 +939,33 @@ function renderClick(sc, area) {
   personDiv.appendChild(speechDiv);
   area.appendChild(personDiv);
 
-  // Items shufflen zodat de juiste antwoorden niet altijd bovenaan staan
+  // Bouw knoppen — voor items die meerdere keren in remaining zitten, meerdere knoppen maken
   const shuffledItems = [...sc.items].sort(() => Math.random() - 0.5);
+
+  // Tel hoe vaak elk item nodig is
+  const neededCount = {};
+  if (!isNeedGame) {
+    remaining.forEach(i => { neededCount[i] = (neededCount[i] || 0) + 1; });
+  }
+
+  // Maak de itemlijst uit: duplicaten krijgen extra knoppen
+  const expandedItems = [];
+  if (!isNeedGame) {
+    shuffledItems.forEach(item => {
+      const count = neededCount[item.i] || 0;
+      if (count > 1) {
+        for (let k = 0; k < count; k++) {
+          expandedItems.push({ ...item, l: item.l + (k > 0 ? ' ' + (k + 1) : '') });
+        }
+      } else {
+        expandedItems.push(item);
+      }
+    });
+    // Shuffle opnieuw na uitbreiding
+    expandedItems.sort(() => Math.random() - 0.5);
+  } else {
+    expandedItems.push(...shuffledItems);
+  }
 
   const clickArea = document.createElement('div');
   clickArea.className = 'click-area';
@@ -953,7 +979,7 @@ function renderClick(sc, area) {
 
   let clickedWrong = false;
 
-  shuffledItems.forEach(item => {
+  expandedItems.forEach(item => {
     const btn = document.createElement('button');
     btn.className = 'item-btn';
     btn.innerHTML = `<span class="item-icon">${item.i}</span><span class="item-label">${item.l}</span>`;
@@ -1008,6 +1034,126 @@ function renderClick(sc, area) {
 }
 
 // ═══════════════════════════════════════════════
+// INVASIE / SPOEDOPDRACHTEN
+// ═══════════════════════════════════════════════
+const INVASIES = {
+  intratuin: [
+    { icon:'🌊', alarm:'CALAMITEIT!', text:'Een klant heeft per ongeluk een emmer water omgegooid. De vloer staat blank!', choices:[
+      {icon:'⚠️', text:'Bordje neerzetten en opruimen', correct:true},
+      {icon:'🏃', text:'Wegrennen', correct:false, feedback:'Wegrennen maakt het alleen maar erger. Bordje neer zodat niemand uitglijdt!'},
+      {icon:'📸', text:'Foto maken voor later', correct:false, feedback:'Grappig, maar gevaarlijk! Eerst veiligheid, dan foto.'}
+    ], tip:'Altijd eerst de veiligheid bewaken.'},
+    { icon:'🐛', alarm:'SPOEDMELDING!', text:'Er zitten insecten op een rek planten. Klanten kijken al raar!', choices:[
+      {icon:'🙋', text:'Direct je begeleider waarschuwen', correct:true},
+      {icon:'🗑️', text:'Alle planten weggooien', correct:false, feedback:'Dat is te snel! Je begeleider weet of de planten te redden zijn.'},
+      {icon:'🤷', text:'Niks doen, het valt wel mee', correct:false, feedback:'Insecten kunnen zich snel verspreiden. Even melden is genoeg.'}
+    ], tip:'Problemen met producten altijd melden bij je begeleider.'},
+    { icon:'💨', alarm:'LET OP!', text:'De deur staat open en er waait van alles om. Klanten kijken verschrikt!', choices:[
+      {icon:'🚪', text:'Deur dichtdoen en omgevallen spullen oprapen', correct:true},
+      {icon:'😮', text:'Verbaasd blijven staan kijken', correct:false, feedback:'Begrijpelijk dat je even schrikt! Maar snel handelen is beter.'},
+      {icon:'📢', text:'Heel hard roepen om hulp', correct:false, feedback:'Roepen mag, maar deur dichtdoen is sneller!'}
+    ], tip:'Rustig blijven en direct actie ondernemen.'}
+  ],
+  papendal: [
+    { icon:'🏃', alarm:'SPOEDMELDING!', text:'Een bus met 30 sporters komt over 5 minuten aan. Er is nog niks klaar!', choices:[
+      {icon:'⚡', text:'Snel prioriteiten stellen en beginnen', correct:true},
+      {icon:'😱', text:'In paniek raken en niks doen', correct:false, feedback:'Paniek helpt niet. Haal even adem en begin met het belangrijkste.'},
+      {icon:'🚪', text:'Naar de wc gaan en wachten', correct:false, feedback:'Dan sta je er straks nog verder vanaf! Snel beginnen is de enige optie.'}
+    ], tip:'Bij tijdsdruk: rustig prioriteiten stellen en direct beginnen.'},
+    { icon:'💥', alarm:'CALAMITEIT!', text:'Iemand heeft een glas laten vallen. Overal scherven!', choices:[
+      {icon:'⚠️', text:'Omgeving afzetten en scherven opruimen met een blik', correct:true},
+      {icon:'🧤', text:'Scherven met je handen oprapen', correct:false, feedback:'Met je handen is gevaarlijk! Gebruik altijd een blik en bezem.'},
+      {icon:'🤷', text:'Laten liggen, iemand anders doet het wel', correct:false, feedback:'Scherven zijn gevaarlijk voor iedereen. Jij bent er het dichtst bij!'}
+    ], tip:'Scherven altijd met blik en bezem, nooit met je handen.'},
+    { icon:'🚨', alarm:'LET OP!', text:'Het brandalarm gaat af! Iedereen kijkt naar jou!', choices:[
+      {icon:'🚪', text:'Rustig iedereen naar de uitgang begeleiden', correct:true},
+      {icon:'🔥', text:'Zelf op zoek gaan naar de brand', correct:false, feedback:'Dat is gevaarlijk! Jouw taak is mensen begeleiden, niet de brand zoeken.'},
+      {icon:'📱', text:'Eerst een filmpje maken', correct:false, feedback:'Echt niet het moment! Mensen veilig naar buiten is nu het enige wat telt.'}
+    ], tip:'Bij brandalarm: rustig en snel naar de uitgang.'}
+  ],
+  mcdonalds: [
+    { icon:'🚨', alarm:'SPOEDMELDING!', text:'De frituur geeft een foutmelding en stopt! Er wachten 10 klanten op friet!', choices:[
+      {icon:'🙋', text:'Direct je leidinggevende roepen', correct:true},
+      {icon:'🔧', text:'Zelf de frituur proberen te repareren', correct:false, feedback:'Frituren zijn gevaarlijk om zelf te repareren. Altijd de leidinggevende bellen!'},
+      {icon:'😶', text:'Niks zeggen en wachten', correct:false, feedback:'Dan worden de klanten alleen maar bozer. Snel melden is beter.'}
+    ], tip:'Technische problemen altijd direct melden.'},
+    { icon:'💥', alarm:'CALAMITEIT!', text:'Een klant gooit zijn dienblad op de grond. Overal eten en drank!', choices:[
+      {icon:'🧹', text:'Vriendelijk vragen of alles goed is en opruimen', correct:true},
+      {icon:'😡', text:'Boos worden op de klant', correct:false, feedback:'Ongelukjes gebeuren. Vriendelijk blijven maakt het veel makkelijker.'},
+      {icon:'🚶', text:'Weglopen alsof je het niet ziet', correct:false, feedback:'De klant heeft jouw hulp nodig! Even vragen of alles goed is kost niks.'}
+    ], tip:'Altijd vriendelijk blijven, ook bij ongelukjes.'},
+    { icon:'⚡', alarm:'LET OP!', text:'Het is plotseling superduk! Er staan 15 mensen in de rij!', choices:[
+      {icon:'📢', text:'Rustig doorwerken en klanten informeren over wachttijd', correct:true},
+      {icon:'😰', text:'In paniek alles door elkaar doen', correct:false, feedback:'Paniek maakt fouten. Rustig één voor één werken gaat sneller dan het lijkt.'},
+      {icon:'🚪', text:'Even naar buiten gaan voor frisse lucht', correct:false, feedback:'Nu even niet! Daarna mag je zeker even bijkomen.'}
+    ], tip:'Druk moment: rustig blijven en klanten informeren.'}
+  ]
+};
+
+function maybeInvasie() {
+  // Kans op invasie: 30% na elke 2e opdracht, alleen als streak >= 2
+  if (state.streak < 2) return false;
+  if (state.current % 2 !== 0) return false;
+  if (Math.random() > 0.35) return false;
+  return true;
+}
+
+function triggerInvasie() {
+  const pool = INVASIES[state.place] || INVASIES.mcdonalds;
+  // Kies een invasie die nog niet recent gebruikt is
+  if (!state.usedInvasies) state.usedInvasies = [];
+  const unused = pool.filter((_, i) => !state.usedInvasies.includes(i));
+  const pickPool = unused.length > 0 ? unused : pool;
+  const idx = Math.floor(Math.random() * pickPool.length);
+  const invasie = pickPool[idx];
+  state.usedInvasies.push(pool.indexOf(invasie));
+
+  clearInterval(state.timerInterval);
+  const area = document.getElementById('game-area');
+  area.innerHTML = '';
+
+  // Alarm banner
+  const alarm = document.createElement('div');
+  alarm.style.cssText = 'background:#e74c3c;color:#fff;border-radius:12px;padding:1rem 1.2rem;display:flex;align-items:center;gap:0.75rem;animation:sIn 0.2s ease;';
+  alarm.innerHTML = `
+    <div style="font-size:2.5rem;animation:shake 0.5s ease infinite">${invasie.icon}</div>
+    <div>
+      <div style="font-weight:900;font-size:0.8rem;letter-spacing:0.1em;opacity:0.85">${invasie.alarm}</div>
+      <div style="font-weight:800;font-size:1rem;line-height:1.3">${invasie.text}</div>
+    </div>`;
+  area.appendChild(alarm);
+
+  // Keuzes
+  const choices = document.createElement('div');
+  choices.className = 'choices';
+  invasie.choices.forEach((c, idx2) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.style.animationDelay = (idx2 * 0.08) + 's';
+    btn.innerHTML = `<span class="choice-icon">${c.icon}</span>${c.text}`;
+    btn.onclick = () => {
+      choices.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+      if (c.correct) {
+        btn.classList.add('correct');
+        state.score += 20 + state.level * 3;
+        showToast('🚨 Crisis opgelost! +' + (20 + state.level * 3), false);
+        updateHUD();
+        if (invasie.tip) showTip('💡 ' + invasie.tip);
+      } else {
+        btn.style.borderColor = 'var(--orange)';
+        btn.style.background = 'rgba(230,126,34,0.12)';
+        const fb = c.feedback || 'Dat snap ik. In een crisis werkt een andere aanpak beter.';
+        showTip('🤔 ' + fb + (invasie.tip ? '<br><br>💡 ' + invasie.tip : ''));
+        showToast('💬 Goede poging!', false);
+      }
+      showVolgendeKnop();
+    };
+    choices.appendChild(btn);
+  });
+  area.appendChild(choices);
+}
+
+// ═══════════════════════════════════════════════
 // LEVEL UP
 // ═══════════════════════════════════════════════
 function checkLevelUp() {
@@ -1015,7 +1161,6 @@ function checkLevelUp() {
     state.level++;
     state.streak = 0;
     showToast('🔥 Level ' + state.level + '! Sneller nu!', false);
-    // inject a harder scenario
     const harder = getScenarios(state.place, state.role, state.level);
     const newSc = harder[Math.floor(Math.random() * harder.length)];
     if (newSc && state.current < state.scenarios.length - 1) {
@@ -1041,7 +1186,11 @@ function showVolgendeKnop() {
 
 function nextScenario() {
   state.current++;
-  renderScenario();
+  if (maybeInvasie()) {
+    triggerInvasie();
+  } else {
+    renderScenario();
+  }
 }
 
 function showTip(tip) {
