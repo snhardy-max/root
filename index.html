@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>StageSimulator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -322,7 +323,9 @@ body {
   <div class="result-score" id="result-score">Je scoorde 0 punten</div>
   <div class="result-tip" id="result-tip"></div>
   <button class="btn-primary" onclick="playAgain()">Nog een keer 🔄</button>
+  <button class="btn-primary" onclick="maakScreenshot()" style="background:var(--blue);box-shadow:0 4px 12px rgba(52,152,219,0.4);margin-top:0.5rem">📸 Sla score op</button>
   <button class="back-btn" onclick="showScreen('home')" style="margin-top:0.5rem">← Andere plek kiezen</button>
+  <div id="screenshot-status" style="font-size:0.85rem;color:var(--muted);min-height:1.4rem;text-align:center;margin-top:0.25rem;"></div>
 </div>
 
 <script>
@@ -1224,6 +1227,43 @@ function endGame() {
   document.getElementById('result-tip').textContent = tips[state.place] || '';
   showScreen('result');
 }
+
+function maakScreenshot(auto) {
+  const el = document.getElementById('result');
+  const status = document.getElementById('screenshot-status');
+  if (status) status.textContent = '📸 Bezig met opslaan...';
+  html2canvas(el, {
+    backgroundColor: '#1a1a2e',
+    scale: 2,
+    useCORS: true,
+    logging: false
+  }).then(canvas => {
+    const link = document.createElement('a');
+    const naam = state.place ? state.place : 'stage';
+    link.download = 'stagesimulator_score_' + naam + '.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    if (status) status.textContent = '✅ Screenshot opgeslagen!';
+    setTimeout(() => { if (status) status.textContent = ''; }, 3000);
+  }).catch(() => {
+    if (status) status.textContent = '❌ Opslaan niet gelukt. Maak een foto van het scherm.';
+  });
+}
+
+// Toon score bij afsluiten als er een actieve game is
+window.addEventListener('beforeunload', (e) => {
+  if (state.score > 0) {
+    // Trigger screenshot automatisch als result-scherm zichtbaar is
+    const resultVisible = document.getElementById('result').classList.contains('active');
+    if (!resultVisible) {
+      // Forceer result scherm kort zichtbaar voor screenshot
+      endGame();
+      setTimeout(() => maakScreenshot(true), 300);
+    }
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
 
 function playAgain() {
   startGame(state.place, state.role);
